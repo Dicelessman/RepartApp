@@ -71,6 +71,32 @@ document.getElementById("allergie").innerText = data.allergie || "-";
 document.getElementById("farmaci").innerText = data.farmaci || "-";
 document.getElementById("noteSanitarie").innerText = data.noteSanitarie || "-";
 
+// Sezione 4: Progressione personale
+document.getElementById("promessa").innerText = data.promessa || "-";
+
+document.getElementById("traccia1_sfida1").innerText = data.traccia1_sfida1 || "-";
+document.getElementById("traccia1_sfida2").innerText = data.traccia1_sfida2 || "-";
+document.getElementById("traccia1_sfida3").innerText = data.traccia1_sfida3 || "-";
+
+document.getElementById("traccia2_sfida1").innerText = data.traccia2_sfida1 || "-";
+document.getElementById("traccia2_sfida2").innerText = data.traccia2_sfida2 || "-";
+document.getElementById("traccia2_sfida3").innerText = data.traccia2_sfida3 || "-";
+
+document.getElementById("traccia3_sfida1").innerText = data.traccia3_sfida1 || "-";
+document.getElementById("traccia3_sfida2").innerText = data.traccia3_sfida2 || "-";
+document.getElementById("traccia3_sfida3").innerText = data.traccia3_sfida3 || "-";
+
+document.getElementById("vcp").innerText = data.vcp || "-";
+document.getElementById("cp").innerText = data.cp || "-";
+
+document.getElementById("giglio").innerText = data.giglio || "-";
+document.getElementById("giglioMotivo").innerText = data.giglioMotivo || "-";
+document.getElementById("noteProgressione").innerText = data.noteProgressione || "-";
+
+
+
+
+
 
 
 
@@ -167,17 +193,53 @@ function copiaIntolleranze() {
   </div>
 </section>
 
+<section class="bg-white rounded p-4 shadow mb-6">
+  <h2 class="text-lg font-bold text-green-700 mb-2">4. Progressione personale</h2>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-800">
+
+    <p><span class="font-semibold">Promessa:</span> <span id="promessa">-</span></p>
+
+    <div>
+      <p class="font-semibold text-green-600">Prima Traccia</p>
+      <p>Sfida 1: <span id="traccia1_sfida1">-</span></p>
+      <p>Sfida 2: <span id="traccia1_sfida2">-</span></p>
+      <p>Sfida 3: <span id="traccia1_sfida3">-</span></p>
+    </div>
+
+    <div>
+      <p class="font-semibold text-green-600">Seconda Traccia</p>
+      <p>Sfida 1: <span id="traccia2_sfida1">-</span></p>
+      <p>Sfida 2: <span id="traccia2_sfida2">-</span></p>
+      <p>Sfida 3: <span id="traccia2_sfida3">-</span></p>
+    </div>
+
+    <div>
+      <p class="font-semibold text-green-600">Terza Traccia</p>
+      <p>Sfida 1: <span id="traccia3_sfida1">-</span></p>
+      <p>Sfida 2: <span id="traccia3_sfida2">-</span></p>
+      <p>Sfida 3: <span id="traccia3_sfida3">-</span></p>
+    </div>
+
+    <p><span class="font-semibold">VCP:</span> <span id="vcp">-</span></p>
+    <p><span class="font-semibold">CP:</span> <span id="cp">-</span></p>
+    
+    <div class="md:col-span-2">
+      <p><span class="font-semibold">Giglio/Trifoglio:</span> <span id="giglio">-</span></p>
+      <p><span class="font-semibold">Motivazione:</span> <span id="giglioMotivo">-</span></p>
+    </div>
+
+    <div class="md:col-span-2">
+      <p><span class="font-semibold">Note:</span> <span id="noteProgressione">-</span></p>
+    </div>
+
+  </div>
+</section>
 
 
 
 
     
 
-<div class="space-y-2">
-      <p><strong>Email:</strong> <span id="emailEsploratore"></span></p>
-      <p><strong>Telefono:</strong> <span id="telefonoEsploratore"></span></p>
-    </div>
-    <!-- Qui aggiungeremo tutte le altre sezioni a mano a mano -->
-  </div>
+
 </body>
 </html>
