@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Scout Reparto - Login</title>
+  <script type="module">
+    // Import SDK di Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+    import { getFirestore } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+
+    // ⚠️ SOSTITUISCI CON LE TUE CREDENZIALI DEL PROGETTO ⚠️
+    const firebaseConfig = {
+        apiKey: "AIzaSyDAs-B2Jk6PvQTb_S_bYfAiTDaQHnSF2EQ",
+        authDomain: "repartapp-3f1a4.firebaseapp.com",
+        projectId: "repartapp-3f1a4",
+        storageBucket: "repartapp-3f1a4.firebasestorage.app",
+        messagingSenderId: "1025798533836",
+        appId: "1:1025798533836:web:c046ef07edf3669e7b8869"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // Azione login
+    document.getElementById("loginForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        alert("Accesso riuscito!");
+        // Qui puoi reindirizzare o caricare altri dati
+      } catch (error) {
+        alert("Errore di accesso: " + error.message);
+      }
+    });
+
+    // Controllo utente loggato
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        console.log("Utente loggato:", user.email);
+      } else {
+        console.log("Nessun utente loggato");
+      }
+    });
+  </script>
+</head>
+<body>
+  <h1>Scout Reparto - Login</h1>
+  <form id="loginForm">
+    <label>Email: <input type="email" id="email" required /></label><br />
+    <label>Password: <input type="password" id="password" required /></label><br />
+    <button type="submit">Login</button>
+  </form>
+</body>
+</html>
+

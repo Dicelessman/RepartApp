@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Scout Reparto - Dashboard</title>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDAs-B2Jk6PvQTb_S_bYfAiTDaQHnSF2EQ",
+      authDomain: "repartapp-3f1a4.firebaseapp.com",
+      projectId: "repartapp-3f1a4",
+      storageBucket: "repartapp-3f1a4.firebasestorage.app",
+      messagingSenderId: "1025798533836",
+      appId: "1:1025798533836:web:c046ef07edf3669e7b8869"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const statusDiv = document.getElementById("status");
+    const contentDiv = document.getElementById("content");
+
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const uid = user.uid;
+        const userDoc = await getDoc(doc(db, "utenti", uid));
+        if (!userDoc.exists()) {
+          statusDiv.textContent = "Utente non trovato nel database.";
+          return;
+        }
+
+        const dati = userDoc.data();
+
+        if (!dati.approvato) {
+          statusDiv.textContent = "Accesso in attesa di approvazione da parte dello staff.";
+          return;
+        }
+
+        statusDiv.innerHTML = `Benvenuto, <strong>${dati.nome}</strong> (${dati.ruolo})`;
+
+        if (dati.ruolo === "staff") {
+          contentDiv.innerHTML = `<p>Accesso completo allo staff. Qui potrai gestire le schede degli esploratori, presenze, eventi, ecc.</p>`;
+        } else {
+          contentDiv.innerHTML = `<p>Visualizzazione scheda personale (in sola lettura). Presto mostreremo i tuoi dati di progressione e attività.</p>`;
+        }
+      } else {
+        statusDiv.textContent = "Non sei loggato. Torna alla pagina di login.";
+      }
+    });
+
+    document.getElementById("logoutBtn").addEventListener("click", async () => {
+      await signOut(auth);
+      window.location.href = "login.html";
+    });
+  </script>
+</head>
+<body>
+  <h1>Scout Reparto - Dashboard</h1>
+  <div id="status">Caricamento dati...</div>
+  <div id="content"></div>
+  <button id="logoutBtn">Logout</button>
+</body>
+</html>

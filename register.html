@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Scout Reparto - Registrazione</title>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+    import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+
+    // ⚠️ Inserisci le stesse credenziali usate nel file login.html ⚠️
+    const firebaseConfig = {
+      apiKey: "AIzaSyDAs-B2Jk6PvQTb_S_bYfAiTDaQHnSF2EQ",
+      authDomain: "repartapp-3f1a4.firebaseapp.com",
+      projectId: "repartapp-3f1a4",
+      storageBucket: "repartapp-3f1a4.firebasestorage.app",
+      messagingSenderId: "1025798533836",
+      appId: "1:1025798533836:web:c046ef07edf3669e7b8869"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // Gestione form di registrazione
+    document.getElementById("registerForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      const nome = document.getElementById("nome").value;
+      const ruolo = document.getElementById("ruolo").value;
+
+      try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const uid = userCredential.user.uid;
+
+        // Salviamo l'utente anche nel database con ruolo e stato di approvazione
+        await setDoc(doc(db, "utenti", uid), {
+          nome,
+          email,
+          ruolo,
+          approvato: ruolo === "esploratore" ? true : false
+        });
+
+        alert("Registrazione completata! Ora puoi accedere.");
+      } catch (error) {
+        alert("Errore nella registrazione: " + error.message);
+      }
+    });
+  </script>
+</head>
+<body>
+  <h1>Registrazione Scout</h1>
+  <form id="registerForm">
+    <label>Nome completo: <input type="text" id="nome" required /></label><br />
+    <label>Email: <input type="email" id="email" required /></label><br />
+    <label>Password: <input type="password" id="password" required /></label><br />
+    <label>Ruolo:
+      <select id="ruolo">
+        <option value="esploratore">Esploratore</option>
+        <option value="staff">Staff</option>
+      </select>
+    </label><br />
+    <button type="submit">Registrati</button>
+  </form>
+</body>
+</html>
