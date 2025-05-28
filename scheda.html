@@ -8,6 +8,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
     import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+	import { updateDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDAs-B2Jk6PvQTb_S_bYfAiTDaQHnSF2EQ",
@@ -164,6 +165,33 @@ document.getElementById("moduloSanitario").innerText = data.moduloSanitario ? "�
 document.getElementById("moduloPrivacy").innerText = data.moduloPrivacy ? "✅" : "❌";
 document.getElementById("noteFinali").innerText = data.noteFinali || "-";
 
+if (userData.ruolo === "staff") {
+  document.getElementById("modificaSchedaContainer").classList.remove("hidden");
+
+  // Precompila il form con i dati attuali
+  document.getElementById("inputQuotaAnnuale").checked = !!data.quotaAnnuale;
+  document.getElementById("inputNoteFinali").value = data.noteFinali || "";
+
+  // Salvataggio modifiche
+  document.getElementById("modificaSchedaForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const quotaAnnuale = document.getElementById("inputQuotaAnnuale").checked;
+    const noteFinali = document.getElementById("inputNoteFinali").value.trim();
+
+    try {
+      await updateDoc(docRef, {
+        quotaAnnuale,
+        noteFinali
+      });
+      alert("Modifiche salvate!");
+      window.location.reload(); // Ricarica per aggiornare i dati visibili
+    } catch (error) {
+      console.error("Errore nel salvataggio:", error);
+      alert("Errore nel salvataggio.");
+    }
+  });
+}
 
 
 
@@ -369,6 +397,24 @@ function copiaIntolleranze() {
   </div>
 </section>
 
+<div id="modificaSchedaContainer" class="mt-6 hidden">
+  <h3 class="text-md font-semibold text-green-700 mb-2">Modifica scheda</h3>
+  <form id="modificaSchedaForm" class="bg-white p-4 rounded shadow space-y-4">
+    <label class="flex items-center space-x-2">
+      <input type="checkbox" id="inputQuotaAnnuale" class="form-checkbox h-4 w-4 text-green-600" />
+      <span>Quota annuale pagata</span>
+    </label>
+
+    <div>
+      <label for="inputNoteFinali" class="block font-medium mb-1">Note</label>
+      <textarea id="inputNoteFinali" class="w-full border border-gray-300 rounded p-2" rows="3"></textarea>
+    </div>
+
+    <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">
+      Salva modifiche
+    </button>
+  </form>
+</div>
 
 
 
