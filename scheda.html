@@ -34,10 +34,16 @@
       const docSnap = await getDoc(docRef);
 
       if (docSnap.exists()) {
-        const dati = docSnap.data();
-        document.getElementById("nomeEsploratore").innerText = `${dati.nome} ${dati.cognome}`;
-        document.getElementById("emailEsploratore").innerText = dati.email;
-        document.getElementById("telefonoEsploratore").innerText = dati.telefono;
+        const data = docSnap.data();
+
+// Sezione 1: Informazioni personali
+document.getElementById("infoCognome").innerText = data.cognome || "-";
+document.getElementById("infoNome").innerText = data.nome || "-";
+document.getElementById("infoDataNascita").innerText = data.dataNascita || "-";
+document.getElementById("infoComuneNascita").innerText = data.comuneNascita || "-";
+document.getElementById("infoCF").innerText = data.codiceFiscale || "-";
+document.getElementById("infoIndirizzo").innerText = data.indirizzo || "-";
+
       } else {
         alert("Esploratore non trovato.");
       }
@@ -53,7 +59,20 @@
 <body class="bg-gray-100 min-h-screen p-6">
   <div class="max-w-3xl mx-auto bg-white rounded shadow p-6">
     <h1 id="nomeEsploratore" class="text-2xl font-bold text-green-700 mb-4">Scheda Esploratore</h1>
-    <div class="space-y-2">
+<section class="bg-white rounded p-4 shadow mb-6">
+  <h2 class="text-lg font-bold text-green-700 mb-2">1. Informazioni personali</h2>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-800">
+    <div><strong>Cognome:</strong> <span id="infoCognome"></span></div>
+    <div><strong>Nome:</strong> <span id="infoNome"></span></div>
+    <div><strong>Data di nascita:</strong> <span id="infoDataNascita"></span></div>
+    <div><strong>Comune di nascita:</strong> <span id="infoComuneNascita"></span></div>
+    <div><strong>Codice fiscale:</strong> <span id="infoCF"></span></div>
+    <div><strong>Indirizzo:</strong> <span id="infoIndirizzo"></span></div>
+  </div>
+</section>
+    
+
+<div class="space-y-2">
       <p><strong>Email:</strong> <span id="emailEsploratore"></span></p>
       <p><strong>Telefono:</strong> <span id="telefonoEsploratore"></span></p>
     </div>
