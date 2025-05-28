@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Scout Reparto - Dashboard</title>
+  <title>Dashboard - RepartApp</title>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
@@ -22,47 +22,51 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    const statusDiv = document.getElementById("status");
-    const contentDiv = document.getElementById("content");
-
     onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        const uid = user.uid;
-        const userDoc = await getDoc(doc(db, "utenti", uid));
-        if (!userDoc.exists()) {
-          statusDiv.textContent = "Utente non trovato nel database.";
-          return;
-        }
+      if (!user) {
+        window.location.href = "login.html";
+        return;
+      }
 
-        const dati = userDoc.data();
+      const uid = user.uid;
+      const userDoc = await getDoc(doc(db, "utenti", uid));
 
-        if (!dati.approvato) {
-          statusDiv.textContent = "Accesso in attesa di approvazione da parte dello staff.";
-          return;
-        }
+      if (!userDoc.exists()) {
+        alert("Utente non trovato nel database.");
+        return;
+      }
 
-        statusDiv.innerHTML = `Benvenuto, <strong>${dati.nome}</strong> (${dati.ruolo})`;
+      const userData = userDoc.data();
+      if (!userData.approvato) {
+        document.body.innerHTML = "<h1>Account in attesa di approvazione</h1>";
+        return;
+      }
 
-        if (dati.ruolo === "staff") {
-          contentDiv.innerHTML = `<p>Accesso completo allo staff. Qui potrai gestire le schede degli esploratori, presenze, eventi, ecc.</p>`;
-        } else {
-          contentDiv.innerHTML = `<p>Visualizzazione scheda personale (in sola lettura). Presto mostreremo i tuoi dati di progressione e attività.</p>`;
-        }
+      // Mostriamo la dashboard personalizzata
+      document.getElementById("welcome").textContent = `Benvenuto, ${userData.nome}!`;
+
+      if (userData.ruolo === "staff") {
+        document.getElementById("staffLink").style.display = "block";
       } else {
-        statusDiv.textContent = "Non sei loggato. Torna alla pagina di login.";
+        document.getElementById("esploratoreLink").style.display = "block";
       }
     });
 
-    document.getElementById("logoutBtn").addEventListener("click", async () => {
-      await signOut(auth);
-      window.location.href = "login.html";
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+      signOut(auth).then(() => {
+        window.location.href = "login.html";
+      });
     });
   </script>
 </head>
 <body>
-  <h1>Scout Reparto - Dashboard</h1>
-  <div id="status">Caricamento dati...</div>
-  <div id="content"></div>
+  <h1 id="welcome">Caricamento dati...</h1>
+  <div id="staffLink" style="display:none;">
+    <a href="#">Gestione esploratori (Staff)</a>
+  </div>
+  <div id="esploratoreLink" style="display:none;">
+    <a href="#">La mia scheda (Esploratore)</a>
+  </div>
   <button id="logoutBtn">Logout</button>
 </body>
 </html>
