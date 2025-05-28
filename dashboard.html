@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Registrazione Scout</title>
+  <title>Dashboard Scout</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-    import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
-    import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDAs-B2Jk6PvQTb_S_bYfAiTDaQHnSF2EQ",
@@ -23,60 +23,48 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    document.getElementById("registerForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
-      const nome = document.getElementById("nome").value;
-      const ruolo = document.getElementById("ruolo").value;
+    const welcomeText = document.getElementById("welcome");
+    const menu = document.getElementById("menu");
+    const logoutBtn = document.getElementById("logoutBtn");
 
-      try {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        const uid = userCredential.user.uid;
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const uid = user.uid;
+        const docRef = doc(db, "utenti", uid);
+        const docSnap = await getDoc(docRef);
 
-        await setDoc(doc(db, "utenti", uid), {
-          nome,
-          email,
-          ruolo,
-          approvato: ruolo === "esploratore" ? true : false
-        });
-
-        alert("Registrazione completata! Ora puoi accedere.");
+        if (docSnap.exists()) {
+          const userData = docSnap.data();
+          welcomeText.textContent = `Benvenuto, ${userData.nome} (${userData.ruolo})!`;
+        } else {
+          welcomeText.textContent = "Benvenuto!";
+        }
+      } else {
         window.location.href = "login.html";
-      } catch (error) {
-        alert("Errore nella registrazione: " + error.message);
       }
+    });
+
+    logoutBtn.addEventListener("click", async () => {
+      await signOut(auth);
+      window.location.href = "login.html";
     });
   </script>
 </head>
-<body class="bg-gray-100 min-h-screen flex items-center justify-center">
-  <div class="bg-white shadow-lg rounded-lg p-8 w-full max-w-md">
-    <h1 class="text-2xl font-bold text-center text-green-700 mb-6">Registrazione Scout</h1>
-    <form id="registerForm" class="space-y-4">
-      <div>
-        <label class="block font-medium">Nome completo</label>
-        <input type="text" id="nome" required class="w-full p-2 border border-gray-300 rounded" />
-      </div>
-      <div>
-        <label class="block font-medium">Email</label>
-        <input type="email" id="email" required class="w-full p-2 border border-gray-300 rounded" />
-      </div>
-      <div>
-        <label class="block font-medium">Password</label>
-        <input type="password" id="password" required class="w-full p-2 border border-gray-300 rounded" />
-      </div>
-      <div>
-        <label class="block font-medium">Ruolo</label>
-        <select id="ruolo" class="w-full p-2 border border-gray-300 rounded">
-          <option value="esploratore">Esploratore</option>
-          <option value="staff">Staff</option>
-        </select>
-      </div>
-      <button type="submit" class="w-full bg-green-700 text-white py-2 rounded hover:bg-green-800 transition">Registrati</button>
-    </form>
-    <p class="mt-4 text-center text-sm">
-      Hai già un account? <a href="login.html" class="text-blue-600 hover:underline">Accedi</a>
-    </p>
+<body class="bg-gray-100 min-h-screen flex flex-col items-center justify-center p-4">
+  <div class="bg-white shadow-xl rounded-xl p-8 w-full max-w-2xl">
+    <h1 class="text-4xl font-bold text-green-700 mb-6 text-center">Dashboard Scout</h1>
+    <p id="welcome" class="text-xl text-center mb-6">Caricamento...</p>
+
+    <div id="menu" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+      <a href="#" class="bg-green-100 hover:bg-green-200 text-green-800 font-semibold py-3 px-5 rounded text-center shadow">📋 Schede Esploratori</a>
+      <a href="#" class="bg-blue-100 hover:bg-blue-200 text-blue-800 font-semibold py-3 px-5 rounded text-center shadow">📆 Eventi</a>
+      <a href="#" class="bg-yellow-100 hover:bg-yellow-200 text-yellow-800 font-semibold py-3 px-5 rounded text-center shadow">✅ Presenze</a>
+      <a href="#" class="bg-purple-100 hover:bg-purple-200 text-purple-800 font-semibold py-3 px-5 rounded text-center shadow">💳 Pagamenti</a>
+    </div>
+
+    <div class="text-center">
+      <button id="logoutBtn" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition">Logout</button>
+    </div>
   </div>
 </body>
 </html>
