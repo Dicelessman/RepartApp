@@ -23,8 +23,7 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    const welcomeText = document.getElementById("welcome");
-    const menu = document.getElementById("menu");
+    const userInfo = document.getElementById("userInfo");
     const logoutBtn = document.getElementById("logoutBtn");
 
     onAuthStateChanged(auth, async (user) => {
@@ -34,10 +33,10 @@
         const docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
-          const userData = docSnap.data();
-          welcomeText.textContent = `Benvenuto, ${userData.nome} (${userData.ruolo})!`;
+          const data = docSnap.data();
+          userInfo.textContent = `Benvenuto, ${data.nome} (${data.ruolo})`;
         } else {
-          welcomeText.textContent = "Benvenuto!";
+          userInfo.textContent = "Utente sconosciuto";
         }
       } else {
         window.location.href = "login.html";
@@ -50,21 +49,19 @@
     });
   </script>
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col items-center justify-center p-4">
-  <div class="bg-white shadow-xl rounded-xl p-8 w-full max-w-2xl">
-    <h1 class="text-4xl font-bold text-green-700 mb-6 text-center">Dashboard Scout</h1>
-    <p id="welcome" class="text-xl text-center mb-6">Caricamento...</p>
-
-    <div id="menu" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-      <a href="#" class="bg-green-100 hover:bg-green-200 text-green-800 font-semibold py-3 px-5 rounded text-center shadow">📋 Schede Esploratori</a>
-      <a href="#" class="bg-blue-100 hover:bg-blue-200 text-blue-800 font-semibold py-3 px-5 rounded text-center shadow">📆 Eventi</a>
-      <a href="#" class="bg-yellow-100 hover:bg-yellow-200 text-yellow-800 font-semibold py-3 px-5 rounded text-center shadow">✅ Presenze</a>
-      <a href="#" class="bg-purple-100 hover:bg-purple-200 text-purple-800 font-semibold py-3 px-5 rounded text-center shadow">💳 Pagamenti</a>
+<body class="bg-gray-100 min-h-screen">
+  <header class="bg-green-700 text-white p-4 shadow">
+    <div class="max-w-4xl mx-auto flex justify-between items-center">
+      <h1 class="text-xl font-bold">RepartApp Dashboard</h1>
+      <button id="logoutBtn" class="bg-red-500 hover:bg-red-600 px-4 py-2 rounded">Logout</button>
     </div>
+  </header>
 
-    <div class="text-center">
-      <button id="logoutBtn" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition">Logout</button>
+  <main class="max-w-4xl mx-auto p-6">
+    <div class="bg-white p-6 rounded shadow">
+      <h2 id="userInfo" class="text-lg font-semibold mb-4">Caricamento dati utente...</h2>
+      <p>Benvenuto nella tua area personale. Da qui potrai gestire le schede degli esploratori, visualizzare presenze, progressioni, eventi e molto altro.</p>
     </div>
-  </div>
+  </main>
 </body>
 </html>
