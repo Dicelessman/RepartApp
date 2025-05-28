@@ -62,6 +62,18 @@ document.getElementById("waGen1").href = `https://wa.me/${telefonoGen1}`;
 document.getElementById("telGen2").href = `tel:${telefonoGen2}`;
 document.getElementById("waGen2").href = `https://wa.me/${telefonoGen2}`;
 
+// Sezione 3: Informazioni sanitarie
+document.getElementById("gruppoSanguigno").innerText = data.gruppoSanguigno || "-";
+document.getElementById("intolleranzeAlimentari").innerText = data.intolleranze || "-";
+document.getElementById("certificazioni").innerText = data.certificazioni || "-";
+document.getElementById("vaccinazioni").innerText = data.vaccinazioni || "-";
+document.getElementById("allergie").innerText = data.allergie || "-";
+document.getElementById("farmaci").innerText = data.farmaci || "-";
+document.getElementById("noteSanitarie").innerText = data.noteSanitarie || "-";
+
+
+
+
       } else {
         alert("Esploratore non trovato.");
       }
@@ -72,6 +84,14 @@ document.getElementById("waGen2").href = `https://wa.me/${telefonoGen2}`;
     } else {
       alert("Nessun ID specificato.");
     }
+
+function copiaIntolleranze() {
+  const text = document.getElementById("intolleranzeAlimentari").innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    alert("Intolleranze copiate negli appunti!");
+  });
+}
+
   </script>
 </head>
 <body class="bg-gray-100 min-h-screen p-6">
@@ -127,6 +147,25 @@ document.getElementById("waGen2").href = `https://wa.me/${telefonoGen2}`;
   </div>
 </section>
 
+<section class="bg-white rounded p-4 shadow mb-6">
+  <h2 class="text-lg font-bold text-green-700 mb-2">3. Informazioni sanitarie</h2>
+  <div class="space-y-2 text-gray-800">
+
+    <p><span class="font-semibold">Gruppo sanguigno:</span> <span id="gruppoSanguigno">-</span></p>
+
+    <div>
+      <span class="font-semibold">Intolleranze alimentari:</span>
+      <span id="intolleranzeAlimentari">-</span>
+      <button onclick="copiaIntolleranze()" class="ml-2 bg-gray-200 px-2 py-1 rounded text-sm hover:bg-gray-300">Copia</button>
+    </div>
+
+    <p><span class="font-semibold">Certificazioni:</span> <span id="certificazioni">-</span></p>
+    <p><span class="font-semibold">Vaccinazioni:</span> <span id="vaccinazioni">-</span></p>
+    <p><span class="font-semibold">Allergie:</span> <span id="allergie">-</span></p>
+    <p><span class="font-semibold">Farmaci:</span> <span id="farmaci">-</span></p>
+    <p><span class="font-semibold">Note sanitarie:</span> <span id="noteSanitarie">-</span></p>
+  </div>
+</section>
 
 
 
