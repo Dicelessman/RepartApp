@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard Scout</title>
+  <title>Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
-    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+    import { getFirestore, doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDAs-B2Jk6PvQTb_S_bYfAiTDaQHnSF2EQ",
@@ -23,9 +23,6 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    const userInfo = document.getElementById("userInfo");
-    const logoutBtn = document.getElementById("logoutBtn");
-
     onAuthStateChanged(auth, async (user) => {
       if (user) {
         const uid = user.uid;
@@ -33,35 +30,58 @@
         const docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
-          const data = docSnap.data();
-          userInfo.textContent = `Benvenuto, ${data.nome} (${data.ruolo})`;
-        } else {
-          userInfo.textContent = "Utente sconosciuto";
+          const userData = docSnap.data();
+          document.getElementById("welcome").innerText = `Benvenuto, ${userData.nome}`;
+
+          if (userData.ruolo === "staff") {
+            document.getElementById("elencoEsploratori").classList.remove("hidden");
+            caricaEsploratori(uid);
+          }
         }
       } else {
         window.location.href = "login.html";
       }
     });
 
-    logoutBtn.addEventListener("click", async () => {
-      await signOut(auth);
-      window.location.href = "login.html";
-    });
+    async function caricaEsploratori(uidCorrente) {
+      const q = query(collection(db, "utenti"), where("ruolo", "==", "esploratore"), where("approvato", "==", true));
+      const querySnapshot = await getDocs(q);
+
+      const listaContainer = document.getElementById("listaEsploratori");
+      listaContainer.innerHTML = "";
+
+      querySnapshot.forEach((doc) => {
+        const esploratore = doc.data();
+        const div = document.createElement("div");
+        div.className = "bg-white shadow p-4 rounded flex justify-between items-center";
+
+        div.innerHTML = `
+          <div>
+            <p class="font-bold">${esploratore.nome}</p>
+            <p class="text-sm text-gray-600">${esploratore.email}</p>
+          </div>
+          <button class="bg-green-600 text-white px-4 py-1 rounded hover:bg-green-700 transition" onclick="alert('Scheda non ancora implementata')">Apri scheda</button>
+        `;
+        listaContainer.appendChild(div);
+      });
+    }
+
+    window.logout = () => {
+      signOut(auth).then(() => window.location.href = "login.html");
+    };
   </script>
 </head>
-<body class="bg-gray-100 min-h-screen">
-  <header class="bg-green-700 text-white p-4 shadow">
-    <div class="max-w-4xl mx-auto flex justify-between items-center">
-      <h1 class="text-xl font-bold">RepartApp Dashboard</h1>
-      <button id="logoutBtn" class="bg-red-500 hover:bg-red-600 px-4 py-2 rounded">Logout</button>
+<body class="bg-gray-100 min-h-screen p-6">
+  <div class="max-w-4xl mx-auto">
+    <div class="flex justify-between items-center mb-6">
+      <h1 id="welcome" class="text-2xl font-bold text-green-700">Benvenuto</h1>
+      <button onclick="logout()" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition">Logout</button>
     </div>
-  </header>
 
-  <main class="max-w-4xl mx-auto p-6">
-    <div class="bg-white p-6 rounded shadow">
-      <h2 id="userInfo" class="text-lg font-semibold mb-4">Caricamento dati utente...</h2>
-      <p>Benvenuto nella tua area personale. Da qui potrai gestire le schede degli esploratori, visualizzare presenze, progressioni, eventi e molto altro.</p>
+    <div id="elencoEsploratori" class="hidden">
+      <h2 class="text-xl font-semibold mb-4 text-green-700">Schede Esploratori</h2>
+      <div id="listaEsploratori" class="space-y-4"></div>
     </div>
-  </main>
+  </div>
 </body>
 </html>
