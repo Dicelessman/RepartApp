@@ -44,6 +44,24 @@ document.getElementById("infoComuneNascita").innerText = data.comuneNascita || "
 document.getElementById("infoCF").innerText = data.codiceFiscale || "-";
 document.getElementById("infoIndirizzo").innerText = data.indirizzo || "-";
 
+// Sezione 2: Contatti
+const telefonoEsploratore = data.telefonoEsploratore || "-";
+const telefonoGen1 = data.telefonoGenitore1 || "-";
+const telefonoGen2 = data.telefonoGenitore2 || "-";
+
+document.getElementById("contattoEsploratore").innerText = telefonoEsploratore;
+document.getElementById("contattoGenitore1").innerText = telefonoGen1;
+document.getElementById("contattoGenitore2").innerText = telefonoGen2;
+
+document.getElementById("telEsploratore").href = `tel:${telefonoEsploratore}`;
+document.getElementById("waEsploratore").href = `https://wa.me/${telefonoEsploratore}`;
+
+document.getElementById("telGen1").href = `tel:${telefonoGen1}`;
+document.getElementById("waGen1").href = `https://wa.me/${telefonoGen1}`;
+
+document.getElementById("telGen2").href = `tel:${telefonoGen2}`;
+document.getElementById("waGen2").href = `https://wa.me/${telefonoGen2}`;
+
       } else {
         alert("Esploratore non trovato.");
       }
@@ -61,6 +79,8 @@ document.getElementById("infoIndirizzo").innerText = data.indirizzo || "-";
     <h1 id="nomeEsploratore" class="text-2xl font-bold text-green-700 mb-4">Scheda Esploratore</h1>
 <section class="bg-white rounded p-4 shadow mb-6">
   <h2 class="text-lg font-bold text-green-700 mb-2">1. Informazioni personali</h2>
+
+// Sezione 1: Informazioni personali
   <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-800">
     <div><strong>Cognome:</strong> <span id="infoCognome"></span></div>
     <div><strong>Nome:</strong> <span id="infoNome"></span></div>
@@ -68,6 +88,48 @@ document.getElementById("infoIndirizzo").innerText = data.indirizzo || "-";
     <div><strong>Comune di nascita:</strong> <span id="infoComuneNascita"></span></div>
     <div><strong>Codice fiscale:</strong> <span id="infoCF"></span></div>
     <div><strong>Indirizzo:</strong> <span id="infoIndirizzo"></span></div>
+
+// Sezione 2: Genitori
+<section class="bg-white rounded p-4 shadow mb-6">
+  <h2 class="text-lg font-bold text-green-700 mb-2">2. Contatti</h2>
+  <div class="space-y-4 text-gray-800">
+
+    <!-- Esploratore -->
+    <div>
+      <p class="font-semibold">Esploratore:</p>
+      <p id="contattoEsploratore"></p>
+      <div class="flex gap-2 mt-1">
+        <a id="telEsploratore" class="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600" target="_blank">Chiama</a>
+        <a id="waEsploratore" class="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600" target="_blank">WhatsApp</a>
+      </div>
+    </div>
+
+    <!-- Genitore 1 -->
+    <div>
+      <p class="font-semibold">Genitore 1:</p>
+      <p id="contattoGenitore1"></p>
+      <div class="flex gap-2 mt-1">
+        <a id="telGen1" class="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600" target="_blank">Chiama</a>
+        <a id="waGen1" class="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600" target="_blank">WhatsApp</a>
+      </div>
+    </div>
+
+    <!-- Genitore 2 -->
+    <div>
+      <p class="font-semibold">Genitore 2:</p>
+      <p id="contattoGenitore2"></p>
+      <div class="flex gap-2 mt-1">
+        <a id="telGen2" class="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600" target="_blank">Chiama</a>
+        <a id="waGen2" class="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600" target="_blank">WhatsApp</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+
+
   </div>
 </section>
     
