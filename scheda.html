@@ -156,6 +156,13 @@ document.getElementById("presenza").innerText = data.presenza ? "✅" : "❌";
 document.getElementById("quotaPagata").innerText = data.quotaPagata ? "✅" : "❌";
 document.getElementById("materialePortato").innerText = data.materialePortato ? "✅" : "❌";
 
+// Sezione 8: Documentazione
+
+document.getElementById("quotaAnnuale").innerText = data.quotaAnnuale ? "✅" : "❌";
+document.getElementById("moduloIscrizione").innerText = data.moduloIscrizione ? "✅" : "❌";
+document.getElementById("moduloSanitario").innerText = data.moduloSanitario ? "✅" : "❌";
+document.getElementById("moduloPrivacy").innerText = data.moduloPrivacy ? "✅" : "❌";
+document.getElementById("noteFinali").innerText = data.noteFinali || "-";
 
 
 
@@ -348,6 +355,20 @@ function copiaIntolleranze() {
 
   </div>
 </section>
+
+<section class="bg-white rounded p-4 shadow mb-6">
+  <h2 class="text-lg font-bold text-green-700 mb-2">8. Documentazione e Note</h2>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-800 text-sm">
+
+    <p><span class="font-semibold">Quota annuale:</span> <span id="quotaAnnuale" class="font-mono">-</span></p>
+    <p><span class="font-semibold">Modulo iscrizione:</span> <span id="moduloIscrizione" class="font-mono">-</span></p>
+    <p><span class="font-semibold">Modulo sanitario:</span> <span id="moduloSanitario" class="font-mono">-</span></p>
+    <p><span class="font-semibold">Modulo privacy:</span> <span id="moduloPrivacy" class="font-mono">-</span></p>
+    <p class="md:col-span-2"><span class="font-semibold">Note:</span> <span id="noteFinali" class="font-mono">-</span></p>
+
+  </div>
+</section>
+
 
 
 
