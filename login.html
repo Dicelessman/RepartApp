@@ -3,77 +3,74 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Scout Reparto - Login</title>
+  <title>Login Scout</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <script type="module">
-    // Import SDK di Firebase
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
-    import { getFirestore } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+    import { getAuth, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
 
-    // ⚠️ SOSTITUISCI CON LE TUE CREDENZIALI DEL PROGETTO ⚠️
     const firebaseConfig = {
-        apiKey: "AIzaSyDAs-B2Jk6PvQTb_S_bYfAiTDaQHnSF2EQ",
-        authDomain: "repartapp-3f1a4.firebaseapp.com",
-        projectId: "repartapp-3f1a4",
-        storageBucket: "repartapp-3f1a4.firebasestorage.app",
-        messagingSenderId: "1025798533836",
-        appId: "1:1025798533836:web:c046ef07edf3669e7b8869"
+      apiKey: "AIzaSyDAs-B2Jk6PvQTb_S_bYfAiTDaQHnSF2EQ",
+      authDomain: "repartapp-3f1a4.firebaseapp.com",
+      projectId: "repartapp-3f1a4",
+      storageBucket: "repartapp-3f1a4.appspot.com",
+      messagingSenderId: "1025798533836",
+      appId: "1:1025798533836:web:c046ef07edf3669e7b8869"
     };
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // Azione login
     document.getElementById("loginForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
+
       try {
-  const userCredential = await signInWithEmailAndPassword(auth, email, password);
-  const uid = userCredential.user.uid;
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const uid = userCredential.user.uid;
 
-  // Legge il documento utente da Firestore
-  const docRef = doc(db, "utenti", uid);
-  const docSnap = await getDoc(docRef);
+        const docRef = doc(db, "utenti", uid);
+        const docSnap = await getDoc(docRef);
 
-  if (docSnap.exists()) {
-    const userData = docSnap.data();
-
-    if (userData.approvato) {
-      alert("Accesso effettuato con successo!");
-      window.location.href = "dashboard.html";
-    } else {
-      alert("Il tuo account è in attesa di approvazione. Contatta lo staff.");
-      await signOut(auth); // Disconnette l’utente
-    }
-  } else {
-    alert("Utente non trovato nel database.");
-    await signOut(auth);
-  }
-} catch (error) {
-  alert("Errore nel login: " + error.message);
-}
-
-    });
-
-    // Controllo utente loggato
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        console.log("Utente loggato:", user.email);
-      } else {
-        console.log("Nessun utente loggato");
+        if (docSnap.exists()) {
+          const userData = docSnap.data();
+          if (userData.approvato) {
+            alert("Accesso effettuato con successo!");
+            window.location.href = "dashboard.html";
+          } else {
+            alert("Il tuo account è in attesa di approvazione. Contatta lo staff.");
+            await signOut(auth);
+          }
+        } else {
+          alert("Utente non trovato nel database.");
+          await signOut(auth);
+        }
+      } catch (error) {
+        alert("Errore nel login: " + error.message);
       }
     });
   </script>
 </head>
-<body>
-  <h1>Scout Reparto - Login</h1>
-  <form id="loginForm">
-    <label>Email: <input type="email" id="email" required /></label><br />
-    <label>Password: <input type="password" id="password" required /></label><br />
-    <button type="submit">Login</button>
-  </form>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+  <div class="bg-white shadow-lg rounded-lg p-8 w-full max-w-md">
+    <h1 class="text-2xl font-bold text-center text-green-700 mb-6">Login Reparto Scout</h1>
+    <form id="loginForm" class="space-y-4">
+      <div>
+        <label class="block font-medium">Email</label>
+        <input type="email" id="email" required class="w-full p-2 border border-gray-300 rounded" />
+      </div>
+      <div>
+        <label class="block font-medium">Password</label>
+        <input type="password" id="password" required class="w-full p-2 border border-gray-300 rounded" />
+      </div>
+      <button type="submit" class="w-full bg-green-700 text-white py-2 rounded hover:bg-green-800 transition">Accedi</button>
+    </form>
+    <p class="mt-4 text-center text-sm">
+      Non hai un account? <a href="register.html" class="text-blue-600 hover:underline">Registrati</a>
+    </p>
+  </div>
 </body>
 </html>
-

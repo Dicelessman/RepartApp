@@ -3,18 +3,18 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Scout Reparto - Registrazione</title>
+  <title>Registrazione Scout</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
     import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
     import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
 
-    // ⚠️ Inserisci le stesse credenziali usate nel file login.html ⚠️
     const firebaseConfig = {
       apiKey: "AIzaSyDAs-B2Jk6PvQTb_S_bYfAiTDaQHnSF2EQ",
       authDomain: "repartapp-3f1a4.firebaseapp.com",
       projectId: "repartapp-3f1a4",
-      storageBucket: "repartapp-3f1a4.firebasestorage.app",
+      storageBucket: "repartapp-3f1a4.appspot.com",
       messagingSenderId: "1025798533836",
       appId: "1:1025798533836:web:c046ef07edf3669e7b8869"
     };
@@ -23,7 +23,6 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // Gestione form di registrazione
     document.getElementById("registerForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       const email = document.getElementById("email").value;
@@ -35,7 +34,6 @@
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const uid = userCredential.user.uid;
 
-        // Salviamo l'utente anche nel database con ruolo e stato di approvazione
         await setDoc(doc(db, "utenti", uid), {
           nome,
           email,
@@ -44,26 +42,41 @@
         });
 
         alert("Registrazione completata! Ora puoi accedere.");
-	window.location.href = "dashboard.html";
+        window.location.href = "login.html";
       } catch (error) {
         alert("Errore nella registrazione: " + error.message);
       }
     });
   </script>
 </head>
-<body>
-  <h1>Registrazione Scout</h1>
-  <form id="registerForm">
-    <label>Nome completo: <input type="text" id="nome" required /></label><br />
-    <label>Email: <input type="email" id="email" required /></label><br />
-    <label>Password: <input type="password" id="password" required /></label><br />
-    <label>Ruolo:
-      <select id="ruolo">
-        <option value="esploratore">Esploratore</option>
-        <option value="staff">Staff</option>
-      </select>
-    </label><br />
-    <button type="submit">Registrati</button>
-  </form>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+  <div class="bg-white shadow-lg rounded-lg p-8 w-full max-w-md">
+    <h1 class="text-2xl font-bold text-center text-green-700 mb-6">Registrazione Scout</h1>
+    <form id="registerForm" class="space-y-4">
+      <div>
+        <label class="block font-medium">Nome completo</label>
+        <input type="text" id="nome" required class="w-full p-2 border border-gray-300 rounded" />
+      </div>
+      <div>
+        <label class="block font-medium">Email</label>
+        <input type="email" id="email" required class="w-full p-2 border border-gray-300 rounded" />
+      </div>
+      <div>
+        <label class="block font-medium">Password</label>
+        <input type="password" id="password" required class="w-full p-2 border border-gray-300 rounded" />
+      </div>
+      <div>
+        <label class="block font-medium">Ruolo</label>
+        <select id="ruolo" class="w-full p-2 border border-gray-300 rounded">
+          <option value="esploratore">Esploratore</option>
+          <option value="staff">Staff</option>
+        </select>
+      </div>
+      <button type="submit" class="w-full bg-green-700 text-white py-2 rounded hover:bg-green-800 transition">Registrati</button>
+    </form>
+    <p class="mt-4 text-center text-sm">
+      Hai già un account? <a href="login.html" class="text-blue-600 hover:underline">Accedi</a>
+    </p>
+  </div>
 </body>
 </html>
