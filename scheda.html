@@ -110,6 +110,45 @@ document.getElementById("brevetti").innerText = data.brevetti || "-";
 document.getElementById("incaricoSquadriglia").innerText = data.incaricoSquadriglia || "-";
 document.getElementById("ruoliParticolari").innerText = data.ruoliParticolari || "-";
 
+// Sezione 6: Eventi e Uscite
+
+// Campi Estivi
+const campiEstiviList = document.getElementById("campiEstivi");
+campiEstiviList.innerHTML = "";
+if (Array.isArray(data.campiEstivi)) {
+  data.campiEstivi.forEach((anno, index) => {
+    const li = document.createElement("li");
+    li.textContent = `Campo Estivo ${index + 1}: ${anno}`;
+    campiEstiviList.appendChild(li);
+  });
+}
+
+// Tecnicamp
+const tecnicampList = document.getElementById("tecnicampList");
+tecnicampList.innerHTML = "";
+if (Array.isArray(data.tecnicamp)) {
+  data.tecnicamp.forEach((tc, index) => {
+    const li = document.createElement("li");
+    li.textContent = `Tecnicamp ${index + 1}: ${tc.anno} (${tc.corso})`;
+    tecnicampList.appendChild(li);
+  });
+}
+
+// Jamboree
+document.getElementById("jamboree").innerText =
+  data.jamboree ? `${data.jamboree.anno} – ${data.jamboree.luogo}` : "-";
+
+// Altri eventi
+const altriEventiList = document.getElementById("altriEventi");
+altriEventiList.innerHTML = "";
+if (Array.isArray(data.altriEventi)) {
+  data.altriEventi.forEach(e => {
+    const li = document.createElement("li");
+    li.textContent = e;
+    altriEventiList.appendChild(li);
+  });
+}
+
 
 
 
@@ -269,6 +308,28 @@ function copiaIntolleranze() {
   </div>
 </section>
 
+<section class="bg-white rounded p-4 shadow mb-6">
+  <h2 class="text-lg font-bold text-green-700 mb-2">6. Eventi e Uscite</h2>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-800 text-sm">
+
+    <div>
+      <p class="font-semibold">Campi Estivi:</p>
+      <ul id="campiEstivi" class="list-disc list-inside pl-4"></ul>
+    </div>
+
+    <div>
+      <p class="font-semibold">Tecnicamp:</p>
+      <ul id="tecnicampList" class="list-disc list-inside pl-4"></ul>
+    </div>
+
+    <p class="md:col-span-2"><span class="font-semibold">Jamboree:</span> <span id="jamboree">-</span></p>
+
+    <div class="md:col-span-2">
+      <p class="font-semibold">Altri eventi:</p>
+      <ul id="altriEventi" class="list-disc list-inside pl-4"></ul>
+    </div>
+  </div>
+</section>
 
 
 
