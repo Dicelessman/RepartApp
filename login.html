@@ -30,14 +30,31 @@
       const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
       try {
-        await signInWithEmailAndPassword(auth, email, password);
-        alert("Accesso riuscito!");
-	window.location.href = "dashboard.html";
+  const userCredential = await signInWithEmailAndPassword(auth, email, password);
+  const uid = userCredential.user.uid;
 
-        // Qui puoi reindirizzare o caricare altri dati
-      } catch (error) {
-        alert("Errore di accesso: " + error.message);
-      }
+  // Legge il documento utente da Firestore
+  const docRef = doc(db, "utenti", uid);
+  const docSnap = await getDoc(docRef);
+
+  if (docSnap.exists()) {
+    const userData = docSnap.data();
+
+    if (userData.approvato) {
+      alert("Accesso effettuato con successo!");
+      window.location.href = "dashboard.html";
+    } else {
+      alert("Il tuo account è in attesa di approvazione. Contatta lo staff.");
+      await signOut(auth); // Disconnette l’utente
+    }
+  } else {
+    alert("Utente non trovato nel database.");
+    await signOut(auth);
+  }
+} catch (error) {
+  alert("Errore nel login: " + error.message);
+}
+
     });
 
     // Controllo utente loggato
