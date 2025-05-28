@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Scheda Esploratore</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
-	import { updateDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDAs-B2Jk6PvQTb_S_bYfAiTDaQHnSF2EQ",
@@ -20,409 +20,88 @@
     };
 
     const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // Funzione per ottenere il parametro "id" dall'URL
-    function getIdFromUrl() {
-      const params = new URLSearchParams(window.location.search);
-      return params.get("id");
-    }
+    const urlParams = new URLSearchParams(window.location.search);
+    const esploratoreId = urlParams.get("id");
 
-    const uid = getIdFromUrl();
-
-    async function caricaScheda(uid) {
-      const docRef = doc(db, "utenti", uid);
-      const docSnap = await getDoc(docRef);
-
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-
-// Sezione 1: Informazioni personali
-document.getElementById("infoCognome").innerText = data.cognome || "-";
-document.getElementById("infoNome").innerText = data.nome || "-";
-document.getElementById("infoDataNascita").innerText = data.dataNascita || "-";
-document.getElementById("infoComuneNascita").innerText = data.comuneNascita || "-";
-document.getElementById("infoCF").innerText = data.codiceFiscale || "-";
-document.getElementById("infoIndirizzo").innerText = data.indirizzo || "-";
-
-// Sezione 2: Contatti
-const telefonoEsploratore = data.telefonoEsploratore || "-";
-const telefonoGen1 = data.telefonoGenitore1 || "-";
-const telefonoGen2 = data.telefonoGenitore2 || "-";
-
-document.getElementById("contattoEsploratore").innerText = telefonoEsploratore;
-document.getElementById("contattoGenitore1").innerText = telefonoGen1;
-document.getElementById("contattoGenitore2").innerText = telefonoGen2;
-
-document.getElementById("telEsploratore").href = `tel:${telefonoEsploratore}`;
-document.getElementById("waEsploratore").href = `https://wa.me/${telefonoEsploratore}`;
-
-document.getElementById("telGen1").href = `tel:${telefonoGen1}`;
-document.getElementById("waGen1").href = `https://wa.me/${telefonoGen1}`;
-
-document.getElementById("telGen2").href = `tel:${telefonoGen2}`;
-document.getElementById("waGen2").href = `https://wa.me/${telefonoGen2}`;
-
-// Sezione 3: Informazioni sanitarie
-document.getElementById("gruppoSanguigno").innerText = data.gruppoSanguigno || "-";
-document.getElementById("intolleranzeAlimentari").innerText = data.intolleranze || "-";
-document.getElementById("certificazioni").innerText = data.certificazioni || "-";
-document.getElementById("vaccinazioni").innerText = data.vaccinazioni || "-";
-document.getElementById("allergie").innerText = data.allergie || "-";
-document.getElementById("farmaci").innerText = data.farmaci || "-";
-document.getElementById("noteSanitarie").innerText = data.noteSanitarie || "-";
-
-// Sezione 4: Progressione personale
-document.getElementById("promessa").innerText = data.promessa || "-";
-
-document.getElementById("traccia1_sfida1").innerText = data.traccia1_sfida1 || "-";
-document.getElementById("traccia1_sfida2").innerText = data.traccia1_sfida2 || "-";
-document.getElementById("traccia1_sfida3").innerText = data.traccia1_sfida3 || "-";
-
-document.getElementById("traccia2_sfida1").innerText = data.traccia2_sfida1 || "-";
-document.getElementById("traccia2_sfida2").innerText = data.traccia2_sfida2 || "-";
-document.getElementById("traccia2_sfida3").innerText = data.traccia2_sfida3 || "-";
-
-document.getElementById("traccia3_sfida1").innerText = data.traccia3_sfida1 || "-";
-document.getElementById("traccia3_sfida2").innerText = data.traccia3_sfida2 || "-";
-document.getElementById("traccia3_sfida3").innerText = data.traccia3_sfida3 || "-";
-
-document.getElementById("vcp").innerText = data.vcp || "-";
-document.getElementById("cp").innerText = data.cp || "-";
-
-document.getElementById("giglio").innerText = data.giglio || "-";
-document.getElementById("giglioMotivo").innerText = data.giglioMotivo || "-";
-document.getElementById("noteProgressione").innerText = data.noteProgressione || "-";
-
-// Sezione 5: Specialità e ruoli
-const specialitaList = document.getElementById("specialitaList");
-specialitaList.innerHTML = "";
-if (Array.isArray(data.specialita)) {
-  data.specialita.forEach(s => {
-    const li = document.createElement("li");
-    li.textContent = `${s.nome} (${s.data || "data non disponibile"})`;
-    specialitaList.appendChild(li);
-  });
-} else {
-  specialitaList.innerHTML = "<li>Nessuna specialità registrata</li>";
-}
-
-document.getElementById("brevetti").innerText = data.brevetti || "-";
-document.getElementById("incaricoSquadriglia").innerText = data.incaricoSquadriglia || "-";
-document.getElementById("ruoliParticolari").innerText = data.ruoliParticolari || "-";
-
-// Sezione 6: Eventi e Uscite
-
-// Campi Estivi
-const campiEstiviList = document.getElementById("campiEstivi");
-campiEstiviList.innerHTML = "";
-if (Array.isArray(data.campiEstivi)) {
-  data.campiEstivi.forEach((anno, index) => {
-    const li = document.createElement("li");
-    li.textContent = `Campo Estivo ${index + 1}: ${anno}`;
-    campiEstiviList.appendChild(li);
-  });
-}
-
-// Tecnicamp
-const tecnicampList = document.getElementById("tecnicampList");
-tecnicampList.innerHTML = "";
-if (Array.isArray(data.tecnicamp)) {
-  data.tecnicamp.forEach((tc, index) => {
-    const li = document.createElement("li");
-    li.textContent = `Tecnicamp ${index + 1}: ${tc.anno} (${tc.corso})`;
-    tecnicampList.appendChild(li);
-  });
-}
-
-// Jamboree
-document.getElementById("jamboree").innerText =
-  data.jamboree ? `${data.jamboree.anno} – ${data.jamboree.luogo}` : "-";
-
-// Altri eventi
-const altriEventiList = document.getElementById("altriEventi");
-altriEventiList.innerHTML = "";
-if (Array.isArray(data.altriEventi)) {
-  data.altriEventi.forEach(e => {
-    const li = document.createElement("li");
-    li.textContent = e;
-    altriEventiList.appendChild(li);
-  });
-}
-
-// Sezione 7: Presenze e attività
-
-document.getElementById("sondaggio").innerText = data.sondaggioCompilato ? "✅" : "❌";
-document.getElementById("presenza").innerText = data.presenza ? "✅" : "❌";
-document.getElementById("quotaPagata").innerText = data.quotaPagata ? "✅" : "❌";
-document.getElementById("materialePortato").innerText = data.materialePortato ? "✅" : "❌";
-
-// Sezione 8: Documentazione
-
-document.getElementById("quotaAnnuale").innerText = data.quotaAnnuale ? "✅" : "❌";
-document.getElementById("moduloIscrizione").innerText = data.moduloIscrizione ? "✅" : "❌";
-document.getElementById("moduloSanitario").innerText = data.moduloSanitario ? "✅" : "❌";
-document.getElementById("moduloPrivacy").innerText = data.moduloPrivacy ? "✅" : "❌";
-document.getElementById("noteFinali").innerText = data.noteFinali || "-";
-
-if (userData.ruolo === "staff") {
-  document.getElementById("modificaSchedaContainer").classList.remove("hidden");
-
-  // Precompila il form con i dati attuali
-  document.getElementById("inputQuotaAnnuale").checked = !!data.quotaAnnuale;
-  document.getElementById("inputNoteFinali").value = data.noteFinali || "";
-
-  // Salvataggio modifiche
-  document.getElementById("modificaSchedaForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
-
-    const quotaAnnuale = document.getElementById("inputQuotaAnnuale").checked;
-    const noteFinali = document.getElementById("inputNoteFinali").value.trim();
-
-    try {
-      await updateDoc(docRef, {
-        quotaAnnuale,
-        noteFinali
-      });
-      alert("Modifiche salvate!");
-      window.location.reload(); // Ricarica per aggiornare i dati visibili
-    } catch (error) {
-      console.error("Errore nel salvataggio:", error);
-      alert("Errore nel salvataggio.");
-    }
-  });
-}
-
-
-
-
-
-
-
-      } else {
-        alert("Esploratore non trovato.");
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.href = "login.html";
+        return;
       }
-    }
 
-    if (uid) {
-      caricaScheda(uid);
-    } else {
-      alert("Nessun ID specificato.");
-    }
+      const staffDoc = await getDoc(doc(db, "utenti", user.uid));
+      const esploratoreDoc = await getDoc(doc(db, "utenti", esploratoreId));
 
-function copiaIntolleranze() {
-  const text = document.getElementById("intolleranzeAlimentari").innerText;
-  navigator.clipboard.writeText(text).then(() => {
-    alert("Intolleranze copiate negli appunti!");
-  });
-}
+      if (!esploratoreDoc.exists()) {
+        alert("Esploratore non trovato");
+        return;
+      }
 
+      const userData = staffDoc.data();
+      const data = esploratoreDoc.data();
+
+      document.getElementById("nomeEsploratore").innerText = data.nome;
+      document.getElementById("quotaAnnuale").innerText = data.quotaAnnuale ? "Sì" : "No";
+      document.getElementById("noteFinali").innerText = data.noteFinali || "-";
+
+      if (userData.ruolo === "staff") {
+        document.getElementById("modificaSchedaContainer").classList.remove("hidden");
+        document.getElementById("inputQuotaAnnuale").checked = !!data.quotaAnnuale;
+        document.getElementById("inputNoteFinali").value = data.noteFinali || "";
+
+        document.getElementById("modificaSchedaForm").addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const quotaAnnuale = document.getElementById("inputQuotaAnnuale").checked;
+          const noteFinali = document.getElementById("inputNoteFinali").value.trim();
+
+          try {
+            await updateDoc(doc(db, "utenti", esploratoreId), {
+              quotaAnnuale,
+              noteFinali
+            });
+            alert("Modifiche salvate!");
+            window.location.reload();
+          } catch (error) {
+            console.error("Errore nel salvataggio:", error);
+            alert("Errore nel salvataggio.");
+          }
+        });
+      }
+    });
   </script>
 </head>
 <body class="bg-gray-100 min-h-screen p-6">
-  <div class="max-w-3xl mx-auto bg-white rounded shadow p-6">
-    <h1 id="nomeEsploratore" class="text-2xl font-bold text-green-700 mb-4">Scheda Esploratore</h1>
-<section class="bg-white rounded p-4 shadow mb-6">
-  <h2 class="text-lg font-bold text-green-700 mb-2">1. Informazioni personali</h2>
+  <div class="max-w-4xl mx-auto space-y-6">
+    <h1 id="nomeEsploratore" class="text-2xl font-bold text-green-700">Caricamento...</h1>
 
+    <section class="bg-white p-4 rounded shadow">
+      <h2 class="text-xl font-semibold text-green-700 mb-2">Sezione 8</h2>
+      <p><strong>Quota annuale pagata:</strong> <span id="quotaAnnuale"></span></p>
+      <p><strong>Note:</strong> <span id="noteFinali"></span></p>
+    </section>
 
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-800">
-    <div><strong>Cognome:</strong> <span id="infoCognome"></span></div>
-    <div><strong>Nome:</strong> <span id="infoNome"></span></div>
-    <div><strong>Data di nascita:</strong> <span id="infoDataNascita"></span></div>
-    <div><strong>Comune di nascita:</strong> <span id="infoComuneNascita"></span></div>
-    <div><strong>Codice fiscale:</strong> <span id="infoCF"></span></div>
-    <div><strong>Indirizzo:</strong> <span id="infoIndirizzo"></span></div>
-  </div>
-</section>
+    <div id="modificaSchedaContainer" class="mt-6 hidden">
+      <h3 class="text-md font-semibold text-green-700 mb-2">Modifica scheda</h3>
+      <form id="modificaSchedaForm" class="bg-white p-4 rounded shadow space-y-4">
+        <label class="flex items-center space-x-2">
+          <input type="checkbox" id="inputQuotaAnnuale" class="form-checkbox h-4 w-4 text-green-600" />
+          <span>Quota annuale pagata</span>
+        </label>
 
-<section class="bg-white rounded p-4 shadow mb-6">
-  <h2 class="text-lg font-bold text-green-700 mb-2">2. Contatti</h2>
-  <div class="space-y-4 text-gray-800">
+        <div>
+          <label for="inputNoteFinali" class="block font-medium mb-1">Note</label>
+          <textarea id="inputNoteFinali" class="w-full border border-gray-300 rounded p-2" rows="3"></textarea>
+        </div>
 
-    <!-- Esploratore -->
-    <div>
-      <p class="font-semibold">Esploratore:</p>
-      <p id="contattoEsploratore"></p>
-      <div class="flex gap-2 mt-1">
-        <a id="telEsploratore" class="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600" target="_blank">Chiama</a>
-        <a id="waEsploratore" class="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600" target="_blank">WhatsApp</a>
-      </div>
-    </div>
-
-    <!-- Genitore 1 -->
-    <div>
-      <p class="font-semibold">Genitore 1:</p>
-      <p id="contattoGenitore1"></p>
-      <div class="flex gap-2 mt-1">
-        <a id="telGen1" class="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600" target="_blank">Chiama</a>
-        <a id="waGen1" class="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600" target="_blank">WhatsApp</a>
-      </div>
-    </div>
-
-    <!-- Genitore 2 -->
-    <div>
-      <p class="font-semibold">Genitore 2:</p>
-      <p id="contattoGenitore2"></p>
-      <div class="flex gap-2 mt-1">
-        <a id="telGen2" class="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600" target="_blank">Chiama</a>
-        <a id="waGen2" class="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600" target="_blank">WhatsApp</a>
-      </div>
+        <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">
+          Salva modifiche
+        </button>
+      </form>
     </div>
   </div>
-</section>
-
-<section class="bg-white rounded p-4 shadow mb-6">
-  <h2 class="text-lg font-bold text-green-700 mb-2">3. Informazioni sanitarie</h2>
-  <div class="space-y-2 text-gray-800">
-
-    <p><span class="font-semibold">Gruppo sanguigno:</span> <span id="gruppoSanguigno">-</span></p>
-
-    <div>
-      <span class="font-semibold">Intolleranze alimentari:</span>
-      <span id="intolleranzeAlimentari">-</span>
-      <button onclick="copiaIntolleranze()" class="ml-2 bg-gray-200 px-2 py-1 rounded text-sm hover:bg-gray-300">Copia</button>
-    </div>
-
-    <p><span class="font-semibold">Certificazioni:</span> <span id="certificazioni">-</span></p>
-    <p><span class="font-semibold">Vaccinazioni:</span> <span id="vaccinazioni">-</span></p>
-    <p><span class="font-semibold">Allergie:</span> <span id="allergie">-</span></p>
-    <p><span class="font-semibold">Farmaci:</span> <span id="farmaci">-</span></p>
-    <p><span class="font-semibold">Note sanitarie:</span> <span id="noteSanitarie">-</span></p>
-  </div>
-</section>
-
-<section class="bg-white rounded p-4 shadow mb-6">
-  <h2 class="text-lg font-bold text-green-700 mb-2">4. Progressione personale</h2>
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-800">
-
-    <p><span class="font-semibold">Promessa:</span> <span id="promessa">-</span></p>
-
-    <div>
-      <p class="font-semibold text-green-600">Prima Traccia</p>
-      <p>Sfida 1: <span id="traccia1_sfida1">-</span></p>
-      <p>Sfida 2: <span id="traccia1_sfida2">-</span></p>
-      <p>Sfida 3: <span id="traccia1_sfida3">-</span></p>
-    </div>
-
-    <div>
-      <p class="font-semibold text-green-600">Seconda Traccia</p>
-      <p>Sfida 1: <span id="traccia2_sfida1">-</span></p>
-      <p>Sfida 2: <span id="traccia2_sfida2">-</span></p>
-      <p>Sfida 3: <span id="traccia2_sfida3">-</span></p>
-    </div>
-
-    <div>
-      <p class="font-semibold text-green-600">Terza Traccia</p>
-      <p>Sfida 1: <span id="traccia3_sfida1">-</span></p>
-      <p>Sfida 2: <span id="traccia3_sfida2">-</span></p>
-      <p>Sfida 3: <span id="traccia3_sfida3">-</span></p>
-    </div>
-
-    <p><span class="font-semibold">VCP:</span> <span id="vcp">-</span></p>
-    <p><span class="font-semibold">CP:</span> <span id="cp">-</span></p>
-    
-    <div class="md:col-span-2">
-      <p><span class="font-semibold">Giglio/Trifoglio:</span> <span id="giglio">-</span></p>
-      <p><span class="font-semibold">Motivazione:</span> <span id="giglioMotivo">-</span></p>
-    </div>
-
-    <div class="md:col-span-2">
-      <p><span class="font-semibold">Note:</span> <span id="noteProgressione">-</span></p>
-    </div>
-
-  </div>
-</section>
-
-<section class="bg-white rounded p-4 shadow mb-6">
-  <h2 class="text-lg font-bold text-green-700 mb-2">5. Specialità e ruoli</h2>
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-800">
-
-    <div class="md:col-span-2">
-      <p class="font-semibold">Specialità:</p>
-      <ul id="specialitaList" class="list-disc list-inside pl-4 text-sm"></ul>
-    </div>
-
-    <p><span class="font-semibold">Brevetti:</span> <span id="brevetti">-</span></p>
-    <p><span class="font-semibold">Incarico di squadriglia:</span> <span id="incaricoSquadriglia">-</span></p>
-    <p><span class="font-semibold">Ruoli particolari:</span> <span id="ruoliParticolari">-</span></p>
-  </div>
-</section>
-
-<section class="bg-white rounded p-4 shadow mb-6">
-  <h2 class="text-lg font-bold text-green-700 mb-2">6. Eventi e Uscite</h2>
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-800 text-sm">
-
-    <div>
-      <p class="font-semibold">Campi Estivi:</p>
-      <ul id="campiEstivi" class="list-disc list-inside pl-4"></ul>
-    </div>
-
-    <div>
-      <p class="font-semibold">Tecnicamp:</p>
-      <ul id="tecnicampList" class="list-disc list-inside pl-4"></ul>
-    </div>
-
-    <p class="md:col-span-2"><span class="font-semibold">Jamboree:</span> <span id="jamboree">-</span></p>
-
-    <div class="md:col-span-2">
-      <p class="font-semibold">Altri eventi:</p>
-      <ul id="altriEventi" class="list-disc list-inside pl-4"></ul>
-    </div>
-  </div>
-</section>
-
-<section class="bg-white rounded p-4 shadow mb-6">
-  <h2 class="text-lg font-bold text-green-700 mb-2">7. Presenze e Attività</h2>
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-800 text-sm">
-
-    <p><span class="font-semibold">Sondaggio compilato:</span> <span id="sondaggio" class="font-mono">-</span></p>
-    <p><span class="font-semibold">Presenza:</span> <span id="presenza" class="font-mono">-</span></p>
-    <p><span class="font-semibold">Quota pagata:</span> <span id="quotaPagata" class="font-mono">-</span></p>
-    <p><span class="font-semibold">Materiale portato:</span> <span id="materialePortato" class="font-mono">-</span></p>
-
-  </div>
-</section>
-
-<section class="bg-white rounded p-4 shadow mb-6">
-  <h2 class="text-lg font-bold text-green-700 mb-2">8. Documentazione e Note</h2>
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-800 text-sm">
-
-    <p><span class="font-semibold">Quota annuale:</span> <span id="quotaAnnuale" class="font-mono">-</span></p>
-    <p><span class="font-semibold">Modulo iscrizione:</span> <span id="moduloIscrizione" class="font-mono">-</span></p>
-    <p><span class="font-semibold">Modulo sanitario:</span> <span id="moduloSanitario" class="font-mono">-</span></p>
-    <p><span class="font-semibold">Modulo privacy:</span> <span id="moduloPrivacy" class="font-mono">-</span></p>
-    <p class="md:col-span-2"><span class="font-semibold">Note:</span> <span id="noteFinali" class="font-mono">-</span></p>
-
-  </div>
-</section>
-
-<div id="modificaSchedaContainer" class="mt-6 hidden">
-  <h3 class="text-md font-semibold text-green-700 mb-2">Modifica scheda</h3>
-  <form id="modificaSchedaForm" class="bg-white p-4 rounded shadow space-y-4">
-    <label class="flex items-center space-x-2">
-      <input type="checkbox" id="inputQuotaAnnuale" class="form-checkbox h-4 w-4 text-green-600" />
-      <span>Quota annuale pagata</span>
-    </label>
-
-    <div>
-      <label for="inputNoteFinali" class="block font-medium mb-1">Note</label>
-      <textarea id="inputNoteFinali" class="w-full border border-gray-300 rounded p-2" rows="3"></textarea>
-    </div>
-
-    <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">
-      Salva modifiche
-    </button>
-  </form>
-</div>
-
-
-
-
-
-
-    
-
-
 </body>
 </html>
