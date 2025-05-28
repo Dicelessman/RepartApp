@@ -32,6 +32,8 @@
       try {
         await signInWithEmailAndPassword(auth, email, password);
         alert("Accesso riuscito!");
+	window.location.href = "dashboard.html";
+
         // Qui puoi reindirizzare o caricare altri dati
       } catch (error) {
         alert("Errore di accesso: " + error.message);
