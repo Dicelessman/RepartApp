@@ -93,6 +93,25 @@ document.getElementById("giglio").innerText = data.giglio || "-";
 document.getElementById("giglioMotivo").innerText = data.giglioMotivo || "-";
 document.getElementById("noteProgressione").innerText = data.noteProgressione || "-";
 
+// Sezione 5: Specialità e ruoli
+const specialitaList = document.getElementById("specialitaList");
+specialitaList.innerHTML = "";
+if (Array.isArray(data.specialita)) {
+  data.specialita.forEach(s => {
+    const li = document.createElement("li");
+    li.textContent = `${s.nome} (${s.data || "data non disponibile"})`;
+    specialitaList.appendChild(li);
+  });
+} else {
+  specialitaList.innerHTML = "<li>Nessuna specialità registrata</li>";
+}
+
+document.getElementById("brevetti").innerText = data.brevetti || "-";
+document.getElementById("incaricoSquadriglia").innerText = data.incaricoSquadriglia || "-";
+document.getElementById("ruoliParticolari").innerText = data.ruoliParticolari || "-";
+
+
+
 
 
 
@@ -234,6 +253,22 @@ function copiaIntolleranze() {
 
   </div>
 </section>
+
+<section class="bg-white rounded p-4 shadow mb-6">
+  <h2 class="text-lg font-bold text-green-700 mb-2">5. Specialità e ruoli</h2>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-800">
+
+    <div class="md:col-span-2">
+      <p class="font-semibold">Specialità:</p>
+      <ul id="specialitaList" class="list-disc list-inside pl-4 text-sm"></ul>
+    </div>
+
+    <p><span class="font-semibold">Brevetti:</span> <span id="brevetti">-</span></p>
+    <p><span class="font-semibold">Incarico di squadriglia:</span> <span id="incaricoSquadriglia">-</span></p>
+    <p><span class="font-semibold">Ruoli particolari:</span> <span id="ruoliParticolari">-</span></p>
+  </div>
+</section>
+
 
 
 
