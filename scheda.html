@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scheda Esploratore</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDAs-B2Jk6PvQTb_S_bYfAiTDaQHnSF2EQ",
+      authDomain: "repartapp-3f1a4.firebaseapp.com",
+      projectId: "repartapp-3f1a4",
+      storageBucket: "repartapp-3f1a4.appspot.com",
+      messagingSenderId: "1025798533836",
+      appId: "1:1025798533836:web:c046ef07edf3669e7b8869"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Funzione per ottenere il parametro "id" dall'URL
+    function getIdFromUrl() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get("id");
+    }
+
+    const uid = getIdFromUrl();
+
+    async function caricaScheda(uid) {
+      const docRef = doc(db, "utenti", uid);
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        const dati = docSnap.data();
+        document.getElementById("nomeEsploratore").innerText = `${dati.nome} ${dati.cognome}`;
+        document.getElementById("emailEsploratore").innerText = dati.email;
+        document.getElementById("telefonoEsploratore").innerText = dati.telefono;
+      } else {
+        alert("Esploratore non trovato.");
+      }
+    }
+
+    if (uid) {
+      caricaScheda(uid);
+    } else {
+      alert("Nessun ID specificato.");
+    }
+  </script>
+</head>
+<body class="bg-gray-100 min-h-screen p-6">
+  <div class="max-w-3xl mx-auto bg-white rounded shadow p-6">
+    <h1 id="nomeEsploratore" class="text-2xl font-bold text-green-700 mb-4">Scheda Esploratore</h1>
+    <div class="space-y-2">
+      <p><strong>Email:</strong> <span id="emailEsploratore"></span></p>
+      <p><strong>Telefono:</strong> <span id="telefonoEsploratore"></span></p>
+    </div>
+    <!-- Qui aggiungeremo tutte le altre sezioni a mano a mano -->
+  </div>
+</body>
+</html>

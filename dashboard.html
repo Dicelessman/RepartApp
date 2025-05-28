@@ -60,7 +60,8 @@
             <p class="font-bold">${esploratore.nome}</p>
             <p class="text-sm text-gray-600">${esploratore.email}</p>
           </div>
-          <button class="bg-green-600 text-white px-4 py-1 rounded hover:bg-green-700 transition" onclick="alert('Scheda non ancora implementata')">Apri scheda</button>
+          <button class="bg-green-600 text-white px-4 py-1 rounded hover:bg-green-700 transition" onclick="window.location.href='scheda.html?id=${doc.id}'">Apri scheda</button>
+
         `;
         listaContainer.appendChild(div);
       });
