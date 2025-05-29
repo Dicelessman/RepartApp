@@ -1,129 +1,170 @@
-<!DOCTYPE html>
+""<!DOCTYPE html>
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Scheda Esploratore</title>
+  <script type="module" src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script type="module" src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script type="module" src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-4 text-gray-800">
+  <div class="max-w-3xl mx-auto bg-white p-6 rounded-2xl shadow-lg">
+    <h1 class="text-2xl font-bold mb-4">Scheda Esploratore</h1>
+    <div id="contenutoScheda"></div>
+    <div id="modificaScheda" class="mt-6 hidden">
+      <h2 class="text-xl font-semibold mb-2">Modifica Dati</h2>
+      <form id="formModifica" class="space-y-4">
+        <div>
+          <label class="block font-medium">Telefono</label>
+          <input type="text" id="modTelefono" class="w-full border rounded p-2" />
+        </div>
+        <div>
+          <label class="block font-medium">Email</label>
+          <input type="email" id="modEmail" class="w-full border rounded p-2" />
+        </div>
+        <div>
+          <label class="block font-medium">Genitore 1</label>
+          <input type="text" id="modGenitore1" class="w-full border rounded p-2" />
+        </div>
+        <div>
+          <label class="block font-medium">Genitore 2</label>
+          <input type="text" id="modGenitore2" class="w-full border rounded p-2" />
+        </div>
+        <div>
+          <label class="block font-medium">Gruppo sanguigno</label>
+          <input type="text" id="modSangue" class="w-full border rounded p-2" />
+        </div>
+        <div>
+          <label class="block font-medium">Intolleranze</label>
+          <input type="text" id="modIntolleranze" class="w-full border rounded p-2" />
+        </div>
+        <div>
+          <label class="block font-medium">Certificazioni</label>
+          <input type="text" id="modCertificazioni" class="w-full border rounded p-2" />
+        </div>
+        <div>
+          <label class="block font-medium">Vaccinazioni</label>
+          <input type="text" id="modVaccinazioni" class="w-full border rounded p-2" />
+        </div>
+        <div>
+          <label class="block font-medium">Allergie</label>
+          <input type="text" id="modAllergie" class="w-full border rounded p-2" />
+        </div>
+        <div>
+          <label class="block font-medium">Farmaci</label>
+          <input type="text" id="modFarmaci" class="w-full border rounded p-2" />
+        </div>
+        <div>
+          <label class="block font-medium">Note sanitarie</label>
+          <textarea id="modNoteSanitarie" class="w-full border rounded p-2"></textarea>
+        </div>
+        <div>
+          <label class="block font-medium">Quota annuale (€)</label>
+          <input type="number" id="modQuota" class="w-full border rounded p-2" />
+        </div>
+        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700">Salva modifiche</button>
+      </form>
+    </div>
+    <button id="btnLogout" class="mt-6 text-red-600 font-bold">Esci</button>
+  </div>
+
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
-    import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     const firebaseConfig = {
-      apiKey: "AIzaSyDAs-B2Jk6PvQTb_S_bYfAiTDaQHnSF2EQ",
-      authDomain: "repartapp-3f1a4.firebaseapp.com",
-      projectId: "repartapp-3f1a4",
-      storageBucket: "repartapp-3f1a4.appspot.com",
-      messagingSenderId: "1025798533836",
-      appId: "1:1025798533836:web:c046ef07edf3669e7b8869"
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_AUTH_DOMAIN",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_BUCKET",
+      messagingSenderId: "YOUR_MESSAGING_ID",
+      appId: "YOUR_APP_ID"
     };
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const esploratoreId = urlParams.get("id");
+    const contenuto = document.getElementById("contenutoScheda");
+    const sezioneModifica = document.getElementById("modificaScheda");
+    const form = document.getElementById("formModifica");
 
     onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        window.location.href = "login.html";
-        return;
-      }
+      if (user) {
+        const uid = user.uid;
+        const docRef = doc(db, "utenti", uid);
+        const docSnap = await getDoc(docRef);
 
-      const staffDoc = await getDoc(doc(db, "utenti", user.uid));
-      const esploratoreDoc = await getDoc(doc(db, "utenti", esploratoreId));
+        if (docSnap.exists()) {
+          const dati = docSnap.data();
 
-      if (!esploratoreDoc.exists()) {
-        alert("Esploratore non trovato");
-        return;
-      }
+          const staff = dati.ruolo === "staff";
+          contenuto.innerHTML = `
+            <p><strong>Nome:</strong> ${dati.nome || ""}</p>
+            <p><strong>Cognome:</strong> ${dati.cognome || ""}</p>
+            <p><strong>Telefono:</strong> ${dati.telefono || ""}</p>
+            <p><strong>Email:</strong> ${dati.email || ""}</p>
+            <p><strong>Genitore 1:</strong> ${dati.genitore1 || ""}</p>
+            <p><strong>Genitore 2:</strong> ${dati.genitore2 || ""}</p>
+            <p><strong>Gruppo Sanguigno:</strong> ${dati.sangue || ""}</p>
+            <p><strong>Intolleranze:</strong> ${dati.intolleranze || ""}</p>
+            <p><strong>Certificazioni:</strong> ${dati.certificazioni || ""}</p>
+            <p><strong>Vaccinazioni:</strong> ${dati.vaccinazioni || ""}</p>
+            <p><strong>Allergie:</strong> ${dati.allergie || ""}</p>
+            <p><strong>Farmaci:</strong> ${dati.farmaci || ""}</p>
+            <p><strong>Note sanitarie:</strong> ${dati.noteSanitarie || ""}</p>
+            <p><strong>Quota annuale:</strong> ${dati.quota || 0} €</p>
+          `;
 
-      const userData = staffDoc.data();
-      const data = esploratoreDoc.data();
+          if (staff) {
+            sezioneModifica.classList.remove("hidden");
+            form.modTelefono.value = dati.telefono || "";
+            form.modEmail.value = dati.email || "";
+            form.modGenitore1.value = dati.genitore1 || "";
+            form.modGenitore2.value = dati.genitore2 || "";
+            form.modSangue.value = dati.sangue || "";
+            form.modIntolleranze.value = dati.intolleranze || "";
+            form.modCertificazioni.value = dati.certificazioni || "";
+            form.modVaccinazioni.value = dati.vaccinazioni || "";
+            form.modAllergie.value = dati.allergie || "";
+            form.modFarmaci.value = dati.farmaci || "";
+            form.modNoteSanitarie.value = dati.noteSanitarie || "";
+            form.modQuota.value = dati.quota || 0;
 
-      document.getElementById("nomeEsploratore").innerText = data.nome;
-
-      const creaRiga = (label, valore) => `<p><strong>${label}:</strong> ${valore || "-"}</p>`;
-
-      document.getElementById("contenutoScheda").innerHTML = `
-        <section class="bg-white p-4 rounded shadow">
-          <h2 class="text-xl font-semibold text-green-700 mb-2">Contatti</h2>
-          ${creaRiga("Telefono", data.telefono)}
-          ${creaRiga("Email", data.email)}
-          ${creaRiga("Genitore 1", `${data.genitore1Nome} - ${data.genitore1Telefono}`)}
-          ${creaRiga("Genitore 2", `${data.genitore2Nome} - ${data.genitore2Telefono}`)}
-        </section>
-
-        <section class="bg-white p-4 rounded shadow">
-          <h2 class="text-xl font-semibold text-green-700 mb-2">Informazioni sanitarie</h2>
-          ${creaRiga("Gruppo sanguigno", data.gruppoSanguigno)}
-          ${creaRiga("Intolleranze", data.intolleranze)}
-          ${creaRiga("Certificazioni", data.certificazioni)}
-          ${creaRiga("Vaccinazioni", data.vaccinazioni)}
-          ${creaRiga("Allergie", data.allergie)}
-          ${creaRiga("Farmaci", data.farmaci)}
-          ${creaRiga("Note", data.noteSanitarie)}
-        </section>
-
-        <section class="bg-white p-4 rounded shadow">
-          <h2 class="text-xl font-semibold text-green-700 mb-2">Quota annuale</h2>
-          ${creaRiga("Quota pagata", data.quotaAnnuale ? "Sì" : "No")}
-          ${creaRiga("Note", data.noteFinali)}
-        </section>
-      `;
-
-      if (userData.ruolo === "staff") {
-        document.getElementById("modificaSchedaContainer").classList.remove("hidden");
-        document.getElementById("inputQuotaAnnuale").checked = !!data.quotaAnnuale;
-        document.getElementById("inputNoteFinali").value = data.noteFinali || "";
-
-        document.getElementById("modificaSchedaForm").addEventListener("submit", async (e) => {
-          e.preventDefault();
-
-          const quotaAnnuale = document.getElementById("inputQuotaAnnuale").checked;
-          const noteFinali = document.getElementById("inputNoteFinali").value.trim();
-
-          try {
-            await updateDoc(doc(db, "utenti", esploratoreId), {
-              quotaAnnuale,
-              noteFinali
+            form.addEventListener("submit", async (e) => {
+              e.preventDefault();
+              await updateDoc(docRef, {
+                telefono: form.modTelefono.value,
+                email: form.modEmail.value,
+                genitore1: form.modGenitore1.value,
+                genitore2: form.modGenitore2.value,
+                sangue: form.modSangue.value,
+                intolleranze: form.modIntolleranze.value,
+                certificazioni: form.modCertificazioni.value,
+                vaccinazioni: form.modVaccinazioni.value,
+                allergie: form.modAllergie.value,
+                farmaci: form.modFarmaci.value,
+                noteSanitarie: form.modNoteSanitarie.value,
+                quota: Number(form.modQuota.value)
+              });
+              alert("Dati aggiornati con successo!");
+              location.reload();
             });
-            alert("Modifiche salvate!");
-            window.location.reload();
-          } catch (error) {
-            console.error("Errore nel salvataggio:", error);
-            alert("Errore nel salvataggio.");
           }
-        });
+        } else {
+          contenuto.innerHTML = "<p class='text-red-600'>Dati non trovati.</p>";
+        }
+      } else {
+        window.location.href = "login.html";
       }
     });
+
+    document.getElementById("btnLogout").addEventListener("click", () => {
+      signOut(auth);
+    });
   </script>
-</head>
-<body class="bg-gray-100 min-h-screen p-6">
-  <div class="max-w-4xl mx-auto space-y-6">
-    <h1 id="nomeEsploratore" class="text-2xl font-bold text-green-700">Caricamento...</h1>
-    <div id="contenutoScheda" class="space-y-6"></div>
-
-    <div id="modificaSchedaContainer" class="mt-6 hidden">
-      <h3 class="text-md font-semibold text-green-700 mb-2">Modifica scheda</h3>
-      <form id="modificaSchedaForm" class="bg-white p-4 rounded shadow space-y-4">
-        <label class="flex items-center space-x-2">
-          <input type="checkbox" id="inputQuotaAnnuale" class="form-checkbox h-4 w-4 text-green-600" />
-          <span>Quota annuale pagata</span>
-        </label>
-
-        <div>
-          <label for="inputNoteFinali" class="block font-medium mb-1">Note</label>
-          <textarea id="inputNoteFinali" class="w-full border border-gray-300 rounded p-2" rows="3"></textarea>
-        </div>
-
-        <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">
-          Salva modifiche
-        </button>
-      </form>
-    </div>
-  </div>
 </body>
 </html>
