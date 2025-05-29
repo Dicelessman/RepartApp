@@ -92,11 +92,12 @@
     const sezioneModifica = document.getElementById("modificaScheda");
     const form = document.getElementById("formModifica");
 
-    onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        const uid = user.uid;
-        const docRef = doc(db, "utenti", uid);
-        const docSnap = await getDoc(docRef);
+   onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const uid = urlParams.get("uid") || user.uid;
+    const docRef = doc(db, "utenti", uid);
+
 
         if (docSnap.exists()) {
           const dati = docSnap.data();

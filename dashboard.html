@@ -4,85 +4,76 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dashboard</title>
+  <script type="module" src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script type="module" src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script type="module" src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-4 text-gray-800">
+  <div class="max-w-4xl mx-auto bg-white p-6 rounded-2xl shadow-lg">
+    <h1 class="text-2xl font-bold mb-4">Benvenuto nella Dashboard</h1>
+    <div id="listaEsploratori" class="space-y-4"></div>
+    <button id="btnLogout" class="mt-6 text-red-600 font-bold">Esci</button>
+  </div>
+
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
-    import { getFirestore, doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getFirestore, collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     const firebaseConfig = {
-      apiKey: "AIzaSyDAs-B2Jk6PvQTb_S_bYfAiTDaQHnSF2EQ",
-      authDomain: "repartapp-3f1a4.firebaseapp.com",
-      projectId: "repartapp-3f1a4",
-      storageBucket: "repartapp-3f1a4.appspot.com",
-      messagingSenderId: "1025798533836",
-      appId: "1:1025798533836:web:c046ef07edf3669e7b8869"
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_AUTH_DOMAIN",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_BUCKET",
+      messagingSenderId: "YOUR_MESSAGING_ID",
+      appId: "YOUR_APP_ID"
     };
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
 
+    const listaEsploratori = document.getElementById("listaEsploratori");
+
     onAuthStateChanged(auth, async (user) => {
       if (user) {
-        const uid = user.uid;
-        const docRef = doc(db, "utenti", uid);
-        const docSnap = await getDoc(docRef);
-
+        const docSnap = await getDoc(doc(db, "utenti", user.uid));
         if (docSnap.exists()) {
-          const userData = docSnap.data();
-          document.getElementById("welcome").innerText = `Benvenuto, ${userData.nome}`;
-
-          if (userData.ruolo === "staff") {
-            document.getElementById("elencoEsploratori").classList.remove("hidden");
-            caricaEsploratori(uid);
+          const dati = docSnap.data();
+          if (dati.ruolo === "staff") {
+            const querySnapshot = await getDocs(collection(db, "utenti"));
+            querySnapshot.forEach((doc) => {
+              const userData = doc.data();
+              if (userData.ruolo !== "staff") {
+                const card = document.createElement("div");
+                card.className = "p-4 border rounded-xl shadow flex justify-between items-center bg-gray-50 hover:bg-gray-100";
+                card.innerHTML = `
+                  <div>
+                    <p class="font-semibold">${userData.nome || ""} ${userData.cognome || ""}</p>
+                    <p class="text-sm text-gray-600">Quota: ${userData.quota || 0} €</p>
+                  </div>
+                  <a href="scheda.html?uid=${doc.id}" class="text-blue-600 font-semibold">Apri scheda</a>
+                `;
+                listaEsploratori.appendChild(card);
+              }
+            });
+          } else {
+            // Non staff: reindirizza alla propria scheda
+            window.location.href = `scheda.html`;
           }
+        } else {
+          alert("Utente non trovato.");
+          signOut(auth);
         }
       } else {
         window.location.href = "login.html";
       }
     });
 
-    async function caricaEsploratori(uidCorrente) {
-      const q = query(collection(db, "utenti"), where("ruolo", "==", "esploratore"), where("approvato", "==", true));
-      const querySnapshot = await getDocs(q);
-
-      const listaContainer = document.getElementById("listaEsploratori");
-      listaContainer.innerHTML = "";
-
-      querySnapshot.forEach((doc) => {
-        const esploratore = doc.data();
-        const div = document.createElement("div");
-        div.className = "bg-white shadow p-4 rounded flex justify-between items-center";
-
-        div.innerHTML = `
-          <div>
-            <p class="font-bold">${esploratore.nome}</p>
-            <p class="text-sm text-gray-600">${esploratore.email}</p>
-          </div>
-          <button class="bg-green-600 text-white px-4 py-1 rounded hover:bg-green-700 transition" onclick="window.location.href='scheda.html?id=${doc.id}'">Apri scheda</button>
-
-        `;
-        listaContainer.appendChild(div);
-      });
-    }
-
-    window.logout = () => {
-      signOut(auth).then(() => window.location.href = "login.html");
-    };
+    document.getElementById("btnLogout").addEventListener("click", () => {
+      signOut(auth);
+    });
   </script>
-</head>
-<body class="bg-gray-100 min-h-screen p-6">
-  <div class="max-w-4xl mx-auto">
-    <div class="flex justify-between items-center mb-6">
-      <h1 id="welcome" class="text-2xl font-bold text-green-700">Benvenuto</h1>
-      <button onclick="logout()" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition">Logout</button>
-    </div>
-
-    <div id="elencoEsploratori" class="hidden">
-      <h2 class="text-xl font-semibold mb-4 text-green-700">Schede Esploratori</h2>
-      <div id="listaEsploratori" class="space-y-4"></div>
-    </div>
-  </div>
 </body>
 </html>
