@@ -15,7 +15,7 @@
   const auth = firebase.auth();
   const db = firebase.firestore();
 
-  onAuthStateChanged(auth, async (user) => {
+  auth.onAuthStateChanged(async (user) => {
     console.log("Stato autenticazione cambiato:", user ? "Utente loggato" : "Nessun utente");
     
     if (!user) {
@@ -26,13 +26,13 @@
 
     try {
       console.log("Recupero dati utente...");
-      const docRef = doc(db, "utenti", user.uid);
-      const docSnap = await getDoc(docRef);
+      const docRef = db.collection("utenti").doc(user.uid);
+      const docSnap = await docRef.get();
       console.log("Dati utente:", docSnap.data());
 
-      if (!docSnap.exists() || !docSnap.data().approvato || !docSnap.data().staff) {
+      if (!docSnap.exists || !docSnap.data().approvato || !docSnap.data().staff) {
         console.log("Utente non autorizzato, logout...");
-        await signOut(auth);
+        await auth.signOut();
         window.location.href = "login.html";
         return;
       }
@@ -40,7 +40,7 @@
       document.getElementById("welcome").textContent = `Benvenuto, ${docSnap.data().nome || 'Staff'}`;
 
       console.log("Recupero lista utenti...");
-      const utentiSnapshot = await getDocs(collection(db, "utenti"));
+      const utentiSnapshot = await db.collection("utenti").get();
       const container = document.getElementById("user-list");
       
       utentiSnapshot.forEach((doc) => {
