@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard - Scout App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-gray-100 min-h-screen p-4">
+    <div class="max-w-4xl mx-auto">
+      <h1 class="text-2xl font-bold mb-4">Dashboard Staff</h1>
+      <button id="logoutBtn" class="mb-4 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">Logout</button>
+      <div id="utentiList" class="grid gap-4"></div>
+    </div>
+
+    <script type="module">
+      import { auth, db } from './firebaseConfig.js';
+      import { onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+      import { collection, getDocs } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+      const utentiList = document.getElementById('utentiList');
+      const logoutBtn = document.getElementById('logoutBtn');
+
+      logoutBtn.addEventListener('click', async () => {
+        await signOut(auth);
+        window.location.href = 'login.html';
+      });
+
+      onAuthStateChanged(auth, async (user) => {
+        if (!user) {
+          window.location.href = 'login.html';
+          return;
+        }
+
+        const docSnap = await db.collection('utenti').doc(user.uid).get();
+        if (!docSnap.exists || docSnap.data().ruolo !== 'staff' || docSnap.data().approvato !== true) {
+          window.location.href = 'login.html';
+          return;
+        }
+
+        const querySnapshot = await getDocs(collection(db, 'utenti'));
+        querySnapshot.forEach((doc) => {
+          const dati = doc.data();
+          if (dati.ruolo === 'esploratore') {
+            const div = document.createElement('div');
+            div.className = 'bg-white p-4 rounded shadow';
+            div.innerHTML = `
+              <h2 class="text-lg font-bold">${dati.email}</h2>
+              <p>UID: ${doc.id}</p>
+              <a href="scheda.html?uid=${doc.id}" class="text-blue-500 underline">Apri scheda</a>
+            `;
+            utentiList.appendChild(div);
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
