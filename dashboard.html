@@ -7,67 +7,45 @@
   <title>Dashboard - RepartApp</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
-    import { getFirestore, collection, query, where, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js";
+  import { getFirestore, doc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js";
+  import { app } from "/js/firebaseConfig.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyDAs-B2Jk6PvQTb_S_bYfAiTDaQHnSF2EQ",
-      authDomain: "repartapp-3f1a4.firebaseapp.com",
-      projectId: "repartapp-3f1a4",
-      storageBucket: "repartapp-3f1a4.appspot.com",
-      messagingSenderId: "1025798533836",
-      appId: "1:1025798533836:web:c046ef07edf3669e7b8869"
-    };
+  const auth = getAuth(app);
+  const db = getFirestore(app);
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      window.location.href = "login.html";
+      return;
+    }
 
-    const welcomeEl = document.getElementById("welcome");
-    const elencoEl = document.getElementById("elencoEsploratori");
-    const listaEl = document.getElementById("listaEsploratori");
-    const logoutBtn = document.getElementById("logoutBtn");
+    const docRef = doc(db, "utenti", user.uid);
+    const docSnap = await getDoc(docRef);
 
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        window.location.href = "login.html";
-        return;
-      }
-      const uid = user.uid;
-      const userDoc = await getDoc(doc(db, "utenti", uid));
-      if (!userDoc.exists()) {
-        alert("Utente non trovato nel database.");
-        return;
-      }
-      const userData = userDoc.data();
-      welcomeEl.textContent = `Benvenuto, ${userData.nome}!`;
-      if (userData.ruolo === "staff") {
-        elencoEl.classList.remove("hidden");
-        const q = query(collection(db, "utenti"), where("ruolo","==","esploratore"), where("approvato","==",true));
-        const snapshot = await getDocs(q);
-        listaEl.innerHTML = "";
-        snapshot.forEach(doc => {
-          const d = doc.data();
-          const card = document.createElement("div");
-          card.className = "bg-white p-4 rounded shadow flex justify-between items-center mb-2";
-          card.innerHTML = `
-            <div>
-              <p class=\"font-semibold\">${d.nome} ${d.cognome}</p>
-              <p class=\"text-sm text-gray-600\">Email: ${d.email}</p>
-            </div>
-            <a href=\"scheda.html?uid=${doc.id}\" class=\"text-blue-600 font-semibold\">Apri scheda</a>
-          `;
-          listaEl.appendChild(card);
-        });
-      } else {
-        // redirect esploratore
-        window.location.href = "scheda.html";
-      }
+    if (!docSnap.exists() || !docSnap.data().approvato || !docSnap.data().staff) {
+      await signOut(auth);
+      window.location.href = "login.html";
+      return;
+    }
+
+    const utentiSnapshot = await getDocs(collection(db, "utenti"));
+    const container = document.getElementById("user-list");
+    utentiSnapshot.forEach((doc) => {
+      const dati = doc.data();
+      const div = document.createElement("div");
+      div.className = "bg-white rounded shadow p-4 hover:bg-gray-50 cursor-pointer";
+      div.innerHTML = `
+        <p class="font-semibold">${dati.nome || "Senza nome"} ${dati.cognome || ""}</p>
+        <p class="text-sm text-gray-500">Email: ${dati.email || "Non disponibile"}</p>
+      `;
+      div.onclick = () => {
+        window.location.href = `scheda.html?id=${doc.id}`;
+      };
+      container.appendChild(div);
     });
-
-    logoutBtn.addEventListener('click', () => signOut(auth));
-  </script>
+  });
+</script>
 </head>
 <body class="bg-gray-100 min-h-screen flex flex-col items-center justify-center p-4">
   <div class="bg-white p-6 rounded shadow w-full max-w-xl">
