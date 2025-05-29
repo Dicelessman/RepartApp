@@ -80,20 +80,56 @@
           </div>`;
       });
 
+      const contatti = dati.contatti || {};
+      const contattiCampi = [
+        { id: 'emailEsploratore', label: "Email Esploratore", val: contatti.emailEsploratore || '' },
+        { id: 'telefonoEsploratore', label: "Telefono Esploratore", val: contatti.telefonoEsploratore || '' },
+        { id: 'nomeGenitore1', label: "Nome Genitore 1", val: contatti.nomeGenitore1 || '' },
+        { id: 'emailGenitore1', label: "Email Genitore 1", val: contatti.emailGenitore1 || '' },
+        { id: 'telGenitore1', label: "Telefono Genitore 1", val: contatti.telGenitore1 || '' },
+        { id: 'nomeGenitore2', label: "Nome Genitore 2", val: contatti.nomeGenitore2 || '' },
+        { id: 'emailGenitore2', label: "Email Genitore 2", val: contatti.emailGenitore2 || '' },
+        { id: 'telGenitore2', label: "Telefono Genitore 2", val: contatti.telGenitore2 || '' },
+      ];
+
+      schedaForm.innerHTML += '<h2 class="text-xl font-bold mt-6">Contatti</h2>';
+      contattiCampi.forEach(c => {
+        const input = isStaff
+          ? `<input id="${c.id}" type="text" value="${c.val}" class="w-full p-2 border rounded" />`
+          : `<p class="p-2 border rounded bg-gray-50">${c.val}</p>`;
+
+        schedaForm.innerHTML += `
+          <div>
+            <label class="font-semibold">${c.label}</label>
+            ${input}
+          </div>`;
+      });
+
       if (isStaff) {
         salvaBtn.classList.remove('hidden');
         salvaBtn.addEventListener('click', async () => {
-          const nuovo = {
+          const nuovoAnagrafica = {
             nome: document.getElementById('nome').value,
             cognome: document.getElementById('cognome').value,
             dataNascita: document.getElementById('dataNascita').value,
             cf: document.getElementById('cf').value,
-            indirizzo: document.getElementById('indirizzo').value,
-            email: document.getElementById('email').value
+            indirizzo: document.getElementById('indirizzo').value
+          };
+
+          const nuovoContatti = {
+            emailEsploratore: document.getElementById('emailEsploratore').value,
+            telefonoEsploratore: document.getElementById('telefonoEsploratore').value,
+            nomeGenitore1: document.getElementById('nomeGenitore1').value,
+            emailGenitore1: document.getElementById('emailGenitore1').value,
+            telGenitore1: document.getElementById('telGenitore1').value,
+            nomeGenitore2: document.getElementById('nomeGenitore2').value,
+            emailGenitore2: document.getElementById('emailGenitore2').value,
+            telGenitore2: document.getElementById('telGenitore2').value
           };
 
           await updateDoc(doc(db, 'utenti', uidScheda), {
-            'datiScheda.anagrafica': nuovo
+            'datiScheda.anagrafica': nuovoAnagrafica,
+            'datiScheda.contatti': nuovoContatti
           });
 
           alert('Dati salvati!');
