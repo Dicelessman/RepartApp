@@ -10,41 +10,55 @@
   import { getFirestore, doc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js";
   import { app } from "/js/firebaseConfig.js";
 
+  console.log("Inizializzazione Firebase...");
   const auth = getAuth(app);
   const db = getFirestore(app);
 
   onAuthStateChanged(auth, async (user) => {
+    console.log("Stato autenticazione cambiato:", user ? "Utente loggato" : "Nessun utente");
+    
     if (!user) {
+      console.log("Nessun utente autenticato, reindirizzamento a login...");
       window.location.href = "login.html";
       return;
     }
 
-    const docRef = doc(db, "utenti", user.uid);
-    const docSnap = await getDoc(docRef);
+    try {
+      console.log("Recupero dati utente...");
+      const docRef = doc(db, "utenti", user.uid);
+      const docSnap = await getDoc(docRef);
+      console.log("Dati utente:", docSnap.data());
 
-    if (!docSnap.exists() || !docSnap.data().approvato || !docSnap.data().staff) {
-      await signOut(auth);
-      window.location.href = "login.html";
-      return;
+      if (!docSnap.exists() || !docSnap.data().approvato || !docSnap.data().staff) {
+        console.log("Utente non autorizzato, logout...");
+        await signOut(auth);
+        window.location.href = "login.html";
+        return;
+      }
+
+      document.getElementById("welcome").textContent = `Benvenuto, ${docSnap.data().nome || 'Staff'}`;
+
+      console.log("Recupero lista utenti...");
+      const utentiSnapshot = await getDocs(collection(db, "utenti"));
+      const container = document.getElementById("user-list");
+      
+      utentiSnapshot.forEach((doc) => {
+        const dati = doc.data();
+        console.log("Dati utente trovato:", dati);
+        const div = document.createElement("div");
+        div.className = "bg-white rounded shadow p-4 hover:bg-gray-50 cursor-pointer";
+        div.innerHTML = `
+          <p class="font-semibold">${dati.nome || "Senza nome"} ${dati.cognome || ""}</p>
+          <p class="text-sm text-gray-500">Email: ${dati.email || "Non disponibile"}</p>
+        `;
+        div.onclick = () => {
+          window.location.href = `scheda.html?id=${doc.id}`;
+        };
+        container.appendChild(div);
+      });
+    } catch (error) {
+      console.error("Errore durante il recupero dei dati:", error);
     }
-
-    document.getElementById("welcome").textContent = `Benvenuto, ${docSnap.data().nome || 'Staff'}`;
-
-    const utentiSnapshot = await getDocs(collection(db, "utenti"));
-    const container = document.getElementById("user-list");
-    utentiSnapshot.forEach((doc) => {
-      const dati = doc.data();
-      const div = document.createElement("div");
-      div.className = "bg-white rounded shadow p-4 hover:bg-gray-50 cursor-pointer";
-      div.innerHTML = `
-        <p class="font-semibold">${dati.nome || "Senza nome"} ${dati.cognome || ""}</p>
-        <p class="text-sm text-gray-500">Email: ${dati.email || "Non disponibile"}</p>
-      `;
-      div.onclick = () => {
-        window.location.href = `scheda.html?id=${doc.id}`;
-      };
-      container.appendChild(div);
-    });
   });
 </script>
 </head>
