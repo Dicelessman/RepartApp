@@ -1,75 +1,52 @@
 <!DOCTYPE html>
 <html lang="it">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Login</title>
-  <script type="module" src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
-  <script type="module" src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js"></script>
-  <script type="module" src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-100 min-h-screen flex items-center justify-center">
-  <div class="bg-white p-8 rounded shadow-md w-full max-w-sm">
-    <h1 class="text-2xl font-bold mb-6 text-center">Accedi</h1>
-    <form id="loginForm" class="space-y-4">
-      <div>
-        <label class="block mb-1 font-medium">Email</label>
-        <input type="email" id="email" class="w-full border rounded px-3 py-2" required />
-      </div>
-      <div>
-        <label class="block mb-1 font-medium">Password</label>
-        <input type="password" id="password" class="w-full border rounded px-3 py-2" required />
-      </div>
-      <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">Login</button>
-    </form>
-  </div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login - Scout App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-gray-100 flex items-center justify-center h-screen">
+    <div class="bg-white p-6 rounded shadow-md w-full max-w-sm">
+      <h2 class="text-xl font-bold mb-4 text-center">Login</h2>
+      <input id="email" type="email" placeholder="Email" class="w-full mb-2 p-2 border rounded" />
+      <input id="password" type="password" placeholder="Password" class="w-full mb-4 p-2 border rounded" />
+      <button id="loginBtn" class="bg-blue-500 hover:bg-blue-600 text-white w-full p-2 rounded">Accedi</button>
+      <p id="errorMsg" class="text-red-500 text-sm mt-2 text-center hidden"></p>
+    </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    <script type="module">
+      import { auth, db } from './firebaseConfig.js';
+      import { signInWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+      import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
-    const firebaseConfig = {
-  	apiKey: "AIzaSyDAs-B2Jk6PvQTb_S_bYfAiTDaQHnSF2EQ",
-  	authDomain: "repartapp-3f1a4.firebaseapp.com",
-  	projectId: "repartapp-3f1a4",
-  	storageBucket: "repartapp-3f1a4.firebasestorage.app",
-  	messagingSenderId: "1025798533836",
-  	appId: "1:1025798533836:web:c046ef07edf3669e7b8869"
-    };
+      const loginBtn = document.getElementById('loginBtn');
+      const emailInput = document.getElementById('email');
+      const passwordInput = document.getElementById('password');
+      const errorMsg = document.getElementById('errorMsg');
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+      loginBtn.addEventListener('click', async () => {
+        const email = emailInput.value;
+        const password = passwordInput.value;
 
-    document.getElementById("loginForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
+        try {
+          const userCredential = await signInWithEmailAndPassword(auth, email, password);
+          const uid = userCredential.user.uid;
 
-      try {
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        const uid = userCredential.user.uid;
-        const userDoc = await getDoc(doc(db, "utenti", uid));
+          const userDoc = await getDoc(doc(db, 'utenti', uid));
+          if (!userDoc.exists()) throw new Error('Utente non trovato');
 
-        if (!userDoc.exists()) throw new Error("Utente non registrato.");
-
-        const userData = userDoc.data();
-        if (!userData.approvato) {
-          await signOut(auth);
-          alert("Il tuo account non è ancora approvato.");
-        } else {
-          if (userData.ruolo === "staff") {
-            window.location.href = "dashboard.html";
-          } else {
-            window.location.href = `scheda.html?uid=${uid}`;
+          const data = userDoc.data();
+          if (data.ruolo === 'staff' && !data.approvato) {
+            throw new Error('Account in attesa di approvazione');
           }
+
+          window.location.href = 'index.html';
+        } catch (err) {
+          errorMsg.textContent = err.message;
+          errorMsg.classList.remove('hidden');
         }
-      } catch (error) {
-        alert("Errore nel login: " + error.message);
-      }
-    });
-  </script>
-</body>
+      });
+    </script>
+  </body>
 </html>
