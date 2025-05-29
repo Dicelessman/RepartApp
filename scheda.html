@@ -7,7 +7,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
     import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -44,8 +44,35 @@
       const data = esploratoreDoc.data();
 
       document.getElementById("nomeEsploratore").innerText = data.nome;
-      document.getElementById("quotaAnnuale").innerText = data.quotaAnnuale ? "Sì" : "No";
-      document.getElementById("noteFinali").innerText = data.noteFinali || "-";
+
+      const creaRiga = (label, valore) => `<p><strong>${label}:</strong> ${valore || "-"}</p>`;
+
+      document.getElementById("contenutoScheda").innerHTML = `
+        <section class="bg-white p-4 rounded shadow">
+          <h2 class="text-xl font-semibold text-green-700 mb-2">Contatti</h2>
+          ${creaRiga("Telefono", data.telefono)}
+          ${creaRiga("Email", data.email)}
+          ${creaRiga("Genitore 1", `${data.genitore1Nome} - ${data.genitore1Telefono}`)}
+          ${creaRiga("Genitore 2", `${data.genitore2Nome} - ${data.genitore2Telefono}`)}
+        </section>
+
+        <section class="bg-white p-4 rounded shadow">
+          <h2 class="text-xl font-semibold text-green-700 mb-2">Informazioni sanitarie</h2>
+          ${creaRiga("Gruppo sanguigno", data.gruppoSanguigno)}
+          ${creaRiga("Intolleranze", data.intolleranze)}
+          ${creaRiga("Certificazioni", data.certificazioni)}
+          ${creaRiga("Vaccinazioni", data.vaccinazioni)}
+          ${creaRiga("Allergie", data.allergie)}
+          ${creaRiga("Farmaci", data.farmaci)}
+          ${creaRiga("Note", data.noteSanitarie)}
+        </section>
+
+        <section class="bg-white p-4 rounded shadow">
+          <h2 class="text-xl font-semibold text-green-700 mb-2">Quota annuale</h2>
+          ${creaRiga("Quota pagata", data.quotaAnnuale ? "Sì" : "No")}
+          ${creaRiga("Note", data.noteFinali)}
+        </section>
+      `;
 
       if (userData.ruolo === "staff") {
         document.getElementById("modificaSchedaContainer").classList.remove("hidden");
@@ -77,12 +104,7 @@
 <body class="bg-gray-100 min-h-screen p-6">
   <div class="max-w-4xl mx-auto space-y-6">
     <h1 id="nomeEsploratore" class="text-2xl font-bold text-green-700">Caricamento...</h1>
-
-    <section class="bg-white p-4 rounded shadow">
-      <h2 class="text-xl font-semibold text-green-700 mb-2">Sezione 8</h2>
-      <p><strong>Quota annuale pagata:</strong> <span id="quotaAnnuale"></span></p>
-      <p><strong>Note:</strong> <span id="noteFinali"></span></p>
-    </section>
+    <div id="contenutoScheda" class="space-y-6"></div>
 
     <div id="modificaSchedaContainer" class="mt-6 hidden">
       <h3 class="text-md font-semibold text-green-700 mb-2">Modifica scheda</h3>
