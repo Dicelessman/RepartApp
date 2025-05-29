@@ -8,7 +8,7 @@
   <script type="module">
   import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js";
   import { getFirestore, doc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js";
-  import { app } from "/js/firebaseConfig.js";
+  import { app } from "./js/firebaseConfig.js";
 
   console.log("Inizializzazione Firebase...");
   const auth = getAuth(app);
