@@ -15,8 +15,16 @@
 
     <script type="module">
       import { auth, db } from './firebaseConfig.js';
-      import { onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-      import { collection, getDocs } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+      import {
+        onAuthStateChanged,
+        signOut
+      } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+      import {
+        collection,
+        doc,
+        getDoc,
+        getDocs
+      } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
       const utentiList = document.getElementById('utentiList');
       const logoutBtn = document.getElementById('logoutBtn');
@@ -32,22 +40,25 @@
           return;
         }
 
-        const docSnap = await db.collection('utenti').doc(user.uid).get();
-        if (!docSnap.exists || docSnap.data().ruolo !== 'staff' || docSnap.data().approvato !== true) {
+        const userDocRef = doc(db, 'utenti', user.uid);
+        const userDocSnap = await getDoc(userDocRef);
+
+        if (!userDocSnap.exists() || userDocSnap.data().ruolo !== 'staff' || userDocSnap.data().approvato !== true) {
           window.location.href = 'login.html';
           return;
         }
 
         const querySnapshot = await getDocs(collection(db, 'utenti'));
-        querySnapshot.forEach((doc) => {
-          const dati = doc.data();
+        querySnapshot.forEach((docSnap) => {
+          const dati = docSnap.data();
           if (dati.ruolo === 'esploratore') {
             const div = document.createElement('div');
             div.className = 'bg-white p-4 rounded shadow';
             div.innerHTML = `
-              <h2 class="text-lg font-bold">${dati.email}</h2>
-              <p>UID: ${doc.id}</p>
-              <a href="scheda.html?uid=${doc.id}" class="text-blue-500 underline">Apri scheda</a>
+              <h2 class="text-lg font-bold">${dati.nome || ''} ${dati.cognome || ''}</h2>
+              <p class="text-sm text-gray-600">${dati.email}</p>
+              <p class="text-xs text-gray-400">UID: ${docSnap.id}</p>
+              <a href="scheda.html?uid=${docSnap.id}" class="mt-2 inline-block text-blue-500 underline">Apri scheda</a>
             `;
             utentiList.appendChild(div);
           }
