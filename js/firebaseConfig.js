@@ -1,5 +1,5 @@
 // Importa le funzionalità necessarie da Firebase
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js";
+import firebase from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js";
 
 // La configurazione di Firebase
 const firebaseConfig = {
@@ -12,4 +12,4 @@ const firebaseConfig = {
 };
 
 // Inizializza Firebase
-export const app = initializeApp(firebaseConfig); 
+export const app = firebase.initializeApp(firebaseConfig); 
