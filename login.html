@@ -3,21 +3,40 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Login Scout</title>
+  <title>Login</title>
+  <script type="module" src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
+  <script type="module" src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js"></script>
+  <script type="module" src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
-import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+  <div class="bg-white p-8 rounded shadow-md w-full max-w-sm">
+    <h1 class="text-2xl font-bold mb-6 text-center">Accedi</h1>
+    <form id="loginForm" class="space-y-4">
+      <div>
+        <label class="block mb-1 font-medium">Email</label>
+        <input type="email" id="email" class="w-full border rounded px-3 py-2" required />
+      </div>
+      <div>
+        <label class="block mb-1 font-medium">Password</label>
+        <input type="password" id="password" class="w-full border rounded px-3 py-2" required />
+      </div>
+      <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">Login</button>
+    </form>
+  </div>
 
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     const firebaseConfig = {
-      apiKey: "AIzaSyDAs-B2Jk6PvQTb_S_bYfAiTDaQHnSF2EQ",
-      authDomain: "repartapp-3f1a4.firebaseapp.com",
-      projectId: "repartapp-3f1a4",
-      storageBucket: "repartapp-3f1a4.appspot.com",
-      messagingSenderId: "1025798533836",
-      appId: "1:1025798533836:web:c046ef07edf3669e7b8869"
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_AUTH_DOMAIN",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_BUCKET",
+      messagingSenderId: "YOUR_MESSAGING_ID",
+      appId: "YOUR_APP_ID"
     };
 
     const app = initializeApp(firebaseConfig);
@@ -32,46 +51,25 @@ import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10
       try {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         const uid = userCredential.user.uid;
+        const userDoc = await getDoc(doc(db, "utenti", uid));
 
-        const docRef = doc(db, "utenti", uid);
-        const docSnap = await getDoc(docRef);
+        if (!userDoc.exists()) throw new Error("Utente non registrato.");
 
-        if (docSnap.exists()) {
-          const userData = docSnap.data();
-          if (userData.approvato) {
-            alert("Accesso effettuato con successo!");
+        const userData = userDoc.data();
+        if (!userData.approvato) {
+          await signOut(auth);
+          alert("Il tuo account non è ancora approvato.");
+        } else {
+          if (userData.ruolo === "staff") {
             window.location.href = "dashboard.html";
           } else {
-            alert("Il tuo account è in attesa di approvazione. Contatta lo staff.");
-            await signOut(auth);
+            window.location.href = `scheda.html?uid=${uid}`;
           }
-        } else {
-          alert("Utente non trovato nel database.");
-          await signOut(auth);
         }
       } catch (error) {
         alert("Errore nel login: " + error.message);
       }
     });
   </script>
-</head>
-<body class="bg-gray-100 min-h-screen flex items-center justify-center">
-  <div class="bg-white shadow-lg rounded-lg p-8 w-full max-w-md">
-    <h1 class="text-2xl font-bold text-center text-green-700 mb-6">Login Reparto Scout</h1>
-    <form id="loginForm" class="space-y-4">
-      <div>
-        <label class="block font-medium">Email</label>
-        <input type="email" id="email" required class="w-full p-2 border border-gray-300 rounded" />
-      </div>
-      <div>
-        <label class="block font-medium">Password</label>
-        <input type="password" id="password" required class="w-full p-2 border border-gray-300 rounded" />
-      </div>
-      <button type="submit" class="w-full bg-green-700 text-white py-2 rounded hover:bg-green-800 transition">Accedi</button>
-    </form>
-    <p class="mt-4 text-center text-sm">
-      Non hai un account? <a href="register.html" class="text-blue-600 hover:underline">Registrati</a>
-    </p>
-  </div>
 </body>
 </html>
