@@ -1,6 +1,3 @@
-// Importa le funzionalità necessarie da Firebase
-import firebase from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js";
-
 // La configurazione di Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyDAs-B2Jk6PvQTb_S_bYfAiTDaQHnSF2EQ",

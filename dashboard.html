@@ -5,14 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dashboard - RepartApp</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
   <script type="module">
-  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js";
-  import { getFirestore, doc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js";
   import { app } from "./js/firebaseConfig.js";
 
   console.log("Inizializzazione Firebase...");
-  const auth = getAuth(app);
-  const db = getFirestore(app);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
 
   onAuthStateChanged(auth, async (user) => {
     console.log("Stato autenticazione cambiato:", user ? "Utente loggato" : "Nessun utente");
