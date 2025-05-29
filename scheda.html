@@ -9,22 +9,18 @@
 <body class="bg-gray-100 min-h-screen p-4">
   <div class="max-w-3xl mx-auto bg-white p-6 rounded shadow">
     <h1 class="text-2xl font-bold mb-4">Scheda Esploratore</h1>
-    <form id="schedaForm" class="space-y-4"></form>
-    <div class="flex justify-between items-center mt-6">
-      <button id="logoutBtn" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">Logout</button>
-      <button id="salvaBtn" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded hidden">Salva</button>
-    </div>
+    <div id="schedaContent" class="space-y-4"></div>
+    <button id="logoutBtn" class="mt-6 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">Logout</button>
   </div>
 
   <script type="module">
     import { auth, db } from './firebaseConfig.js';
     import { onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-    import { doc, getDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+    import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
     const uidParam = new URLSearchParams(window.location.search).get('uid');
-    const schedaForm = document.getElementById('schedaForm');
+    const schedaContent = document.getElementById('schedaContent');
     const logoutBtn = document.getElementById('logoutBtn');
-    const salvaBtn = document.getElementById('salvaBtn');
 
     logoutBtn.addEventListener('click', async () => {
       await signOut(auth);
@@ -32,18 +28,24 @@
     });
 
     onAuthStateChanged(auth, async (user) => {
-      if (!user) return window.location.href = 'login.html';
+      if (!user) {
+        window.location.href = 'login.html';
+        return;
+      }
 
       const utenteCorrente = await getDoc(doc(db, 'utenti', user.uid));
-      if (!utenteCorrente.exists()) return window.location.href = 'login.html';
+      if (!utenteCorrente.exists()) {
+        window.location.href = 'login.html';
+        return;
+      }
 
       const datiUtente = utenteCorrente.data();
-      const isStaff = datiUtente.ruolo === 'staff' && datiUtente.approvato;
+      const isStaff = datiUtente.ruolo === 'staff' && datiUtente.approvato === true;
 
       const uidScheda = uidParam || user.uid;
       const schedaDoc = await getDoc(doc(db, 'utenti', uidScheda));
       if (!schedaDoc.exists()) {
-        schedaForm.innerHTML = '<p class="text-red-500">Scheda non trovata.</p>';
+        schedaContent.innerHTML = '<p class="text-red-500">Scheda non trovata.</p>';
         return;
       }
 
@@ -51,49 +53,21 @@
       const dati = datiScheda.datiScheda || {};
 
       if (!isStaff && uidScheda !== user.uid) {
-        schedaForm.innerHTML = '<p class="text-red-500">Accesso non autorizzato.</p>';
+        schedaContent.innerHTML = '<p class="text-red-500">Accesso non autorizzato.</p>';
         return;
       }
 
-      const anagrafica = dati.anagrafica || {};
-      const campi = [
-        { id: 'nome', label: 'Nome', val: anagrafica.nome || '' },
-        { id: 'cognome', label: 'Cognome', val: anagrafica.cognome || '' },
-        { id: 'dataNascita', label: 'Data di nascita', val: anagrafica.dataNascita || '', type: 'date' },
-        { id: 'cf', label: 'Codice Fiscale', val: anagrafica.cf || '' },
-        { id: 'indirizzo', label: 'Indirizzo', val: anagrafica.indirizzo || '' }
-      ];
-
-      campi.forEach(c => {
-        const input = isStaff
-          ? `<input id="${c.id}" type="${c.type || 'text'}" value="${c.val}" class="w-full p-2 border rounded" />`
-          : `<p class="p-2 border rounded bg-gray-50">${c.val}</p>`;
-
-        schedaForm.innerHTML += `
-          <div>
-            <label class="font-semibold">${c.label}</label>
-            ${input}
-          </div>`;
-      });
-
-      if (isStaff) {
-        salvaBtn.classList.remove('hidden');
-        salvaBtn.addEventListener('click', async () => {
-          const nuovo = {
-            nome: document.getElementById('nome').value,
-            cognome: document.getElementById('cognome').value,
-            dataNascita: document.getElementById('dataNascita').value,
-            cf: document.getElementById('cf').value,
-            indirizzo: document.getElementById('indirizzo').value
-          };
-
-          await updateDoc(doc(db, 'utenti', uidScheda), {
-            'datiScheda.anagrafica': nuovo
-          });
-
-          alert('Dati salvati!');
-        });
-      }
+      schedaContent.innerHTML = `
+        <div>
+          <h2 class="text-lg font-semibold">Dati Anagrafici</h2>
+          <p><strong>Email:</strong> ${datiScheda.email}</p>
+          <p><strong>Nome:</strong> ${dati.anagrafica?.nome || '-'}</p>
+          <p><strong>Cognome:</strong> ${dati.anagrafica?.cognome || '-'}</p>
+          <p><strong>Data di nascita:</strong> ${dati.anagrafica?.dataNascita || '-'}</p>
+          <p><strong>Codice Fiscale:</strong> ${dati.anagrafica?.cf || '-'}</p>
+          <p><strong>Indirizzo:</strong> ${dati.anagrafica?.indirizzo || '-'}</p>
+        </div>
+      `;
     });
   </script>
 </body>
